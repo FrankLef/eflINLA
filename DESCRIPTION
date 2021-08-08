@@ -2,10 +2,10 @@ Package: eflINLA
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Frank Lefever
+Maintainer: Frank Lefever <flefebvre01@hotmail.com>
+Description: Utilities to use with the INLA package.
+    Different tools to create summaries, plots with the INLA package.
 License: file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -19,4 +19,5 @@ Imports:
     rlang (>= 0.4.8),
     dplyr (>= 1.0.2),
     tibble (>= 3.0.6),
-    cli (>= 2.1.0)
+    cli (>= 2.1.0),
+    INLA (>= 21.02.23)
