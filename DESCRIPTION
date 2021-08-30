@@ -5,7 +5,8 @@ Version: 0.1.0
 Author: Frank Lefever
 Maintainer: Frank Lefever <flefebvre01@hotmail.com>
 Description: Utilities to use with the INLA package.
-    Different tools to create summaries, plots with the INLA package.
+    Different tools to create summaries, plots with the INLA package. Inspired
+    by the `brinla` package but using the tidyverse and with more documentation.
 License: file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -13,11 +14,12 @@ RoxygenNote: 7.1.1
 Depends: R (>= 4.0.0)
 Suggests:
     testthat (>= 3.0.4),
-    checkmate (>= 2.0.0),
-    assertthat (>= 0.2.1)
+    assertthat (>= 0.2.1),
+    here (>= 1.0.1)
 Imports:
     rlang (>= 0.4.8),
     dplyr (>= 1.0.2),
     tibble (>= 3.0.6),
     cli (>= 2.1.0),
-    INLA (>= 21.02.23)
+    INLA (>= 21.02.23),
+    brms (>= 2.15.0)
