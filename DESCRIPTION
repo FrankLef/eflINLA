@@ -7,7 +7,7 @@ Maintainer: Frank Lefever <flefebvre01@hotmail.com>
 Description: Utilities to use with the INLA package.
     Different tools to create summaries, plots with the INLA package. Inspired
     by the `brinla` package but using the tidyverse and with more documentation.
-License: file LICENSE
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
