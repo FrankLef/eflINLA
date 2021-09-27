@@ -3,6 +3,10 @@
 \name{predict_inla}
 \alias{predict_inla}
 \title{Predictions using an `inla` model object}
+\source{
+Bayesian Inference with INLA, Virgilio Gomez-Rubio, 2020, section 2.7,
+p. 35-38
+}
 \usage{
 predict_inla(object, pos, n = 1L)
 }

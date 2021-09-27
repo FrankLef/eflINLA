@@ -6,6 +6,9 @@
 #' Make predictions using the `INLA::inla.posterior.sample` function, then
 #' extract the linear predictors and add variability to them.
 #'
+#' @source Bayesian Inference with INLA, Virgilio Gomez-Rubio, 2020, section 2.7,
+#' p. 35-38
+#'
 #' @param object Object of class `inla` with the new data.
 #' @param pos Integer() with the position of the row with dependent variable
 #' set to `NA` in the new data.
