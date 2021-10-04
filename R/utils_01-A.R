@@ -1,6 +1,6 @@
-#' Convert precision to standard deviation
+#' Convert precision to standard deviation using marginals
 #'
-#' Convert precision to standard deviation.
+#' Convert precision to standard deviation using marginals.
 #'
 #' Convert precision to standard deviation with data from the marginal of
 #' INLA.
@@ -13,16 +13,45 @@
 #'
 #' @return precision converted to standard deviation using marginal
 #' @export
-prec2sd <- function(marg, is_log=FALSE) {
-  if (is_log) {
-    INLA::inla.tmarginal(fun = function(x) 1 / sqrt(exp(x)),
-                                marginal = marg, n = nrow(marg))
-  } else {
-    INLA::inla.tmarginal(fun = function(x) 1 / sqrt(x),
-                                marginal = marg, n = nrow(marg))
-  }
+prec2sd_marg <- function(marg, is_log = FALSE) {
+  INLA::inla.tmarginal(fun = function(x) prec2sd(x, is_log = is_log),
+                       marginal = marg, n = nrow(marg))
 }
 
+
+#' Convert precision to standard deviation
+#'
+#' Convert precision to standard deviation.
+#'
+#' Convert precision to standard deviation and inverse trasnform the log when
+#' required.
+#'
+#' @param x Numeric
+#' @param is_log FALSE (default): convert using natural scale; TRUE: convert using
+#' log scale.
+#'
+#' @return precision converted to standard deviation
+#' @export
+prec2sd <- function(x, is_log=FALSE) {
+  checkmate::assert_numeric(x, finite = TRUE)
+
+  # must be positive when is_log = FALSE
+  if (!is_log & any(x <= 0)) {
+    msg_head <- cli::col_yellow("Value must be positive.")
+    msg_body <- c("x" = sprintf("%d non-positive values", sum(x <= 0)))
+    msg <- paste(msg_head, rlang::format_error_bullets(msg_body), sep = "\n")
+    rlang::abort(
+      message = msg,
+      class = "prec2sd_error")
+  }
+
+  # transform
+  if (is_log) {
+    1 / sqrt(exp(x))
+  } else {
+    1 / sqrt(x)
+  }
+}
 
 #' Rename strings (row names) from \code{inla} to \code{brms} equivalent
 #'

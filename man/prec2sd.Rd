@@ -3,25 +3,22 @@
 \name{prec2sd}
 \alias{prec2sd}
 \title{Convert precision to standard deviation}
-\source{
-section 2.6, p. 31, Bayesian Inference with INLA, Gomez-Rubio
-}
 \usage{
-prec2sd(marg, is_log = FALSE)
+prec2sd(x, is_log = FALSE)
 }
 \arguments{
-\item{marg}{marginal from \code{inla}}
+\item{x}{Numeric}
 
 \item{is_log}{FALSE (default): convert using natural scale; TRUE: convert using
 log scale.}
 }
 \value{
-precision converted to standard deviation using marginal
+precision converted to standard deviation
 }
 \description{
 Convert precision to standard deviation.
 }
 \details{
-Convert precision to standard deviation with data from the marginal of
-INLA.
+Convert precision to standard deviation and inverse trasnform the log when
+required.
 }

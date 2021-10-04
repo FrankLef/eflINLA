@@ -11,7 +11,27 @@ test_that("verify inla model object", {
 })
 
 
-test_that("prec2sd: log = FALSE", {
+test_that("prec2sd", {
+  # test with is_log = TRUE
+  x <- c(2, -1, -0.1, 0, 0.1, 1, 2)
+  y <- prec2sd(x, is_log = TRUE)
+  z <- 1 / sqrt(exp(x))
+  expect_identical(y, z)
+
+  # test with is_log = FALSE
+  # numbers must be positive
+  x <- c(0, 0.1, 1, 2)
+  expect_error(prec2sd(x, is_log = FALSE), class = "prec2sd_error")
+
+  # numbers must be positive
+  x <- c(0.1, 1, 2)
+  y <- prec2sd(x, is_log = FALSE)
+  z <- 1 / sqrt(x)
+  expect_identical(y, z)
+})
+
+
+test_that("prec2sd_marg: log = FALSE", {
   nm <- "Precision for the Gaussian observations"
 
   marg <- i04M07ctr$marginals.hyperpar[[nm]]
@@ -19,7 +39,7 @@ test_that("prec2sd: log = FALSE", {
   # print(marg)
   # cat("\n")
 
-  marg_sd <- prec2sd(marg, is_log=FALSE)
+  marg_sd <- prec2sd_marg(marg, is_log=FALSE)
   # cat("\n")
   # print(marg_sd)
   # cat("\n")
@@ -35,7 +55,7 @@ test_that("prec2sd: log = FALSE", {
   # print(intern_marg)
   # cat("\n")
 
-  intern_marg_sd <- prec2sd(intern_marg, is_log=TRUE)
+  intern_marg_sd <- prec2sd_marg(intern_marg, is_log=TRUE)
 
   # NOTE: Both internal and non-log marginal should give the same
   #       result on the natural scale

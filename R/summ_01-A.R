@@ -65,8 +65,9 @@ transform_hyper_marginal <- function(r, sd_name = "sd") {
     FUN = function(marg, nm, imarg) {
       if(grepl(pattern = prec_rgx, x = nm, ignore.case = TRUE)) {
         # use inverse transformed internal.marginals.hyperpar for precision
-        m <- INLA::inla.tmarginal(fun = function(x) 1 / sqrt(exp(x)),
-                                  marginal = imarg)
+        # m <- INLA::inla.tmarginal(fun = function(x) 1 / sqrt(exp(x)),
+        #                           marginal = imarg)
+        m <- prec2sd_marg(imarg, is_log = TRUE)
       } else {
         # use marginals.hyperpar for other hyperparameters
         m <- marg
