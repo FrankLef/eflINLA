@@ -82,7 +82,7 @@ transform_hyper_marginal <- function(r, sd_name = "sd") {
   names(margs) <- sub(pattern = prec_rgx, replacement = sd_name,
                          x = names(margs), ignore.case = TRUE)
 
-  # the sd row must be the last one
+  # the sd row must be the last one (useful for summaries)
   rgx <- paste0("^", sd_name, ".+")
   pos <- grepl(pattern=rgx, x=names(margs))
   out <- append(margs[!pos], margs[pos])

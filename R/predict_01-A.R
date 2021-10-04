@@ -51,8 +51,7 @@ predict_inla_extract <- function(samples, pos) {
   # get the sigma from every sample
   sigmas <- sapply(X = samples,
                    FUN = function(x) {
-                     prec <- x$hyperpar[[prec_pos]]
-                     1 / sqrt(prec)
+                     1 / sqrt(x$hyperpar[[prec_pos]])
                    })
   assertthat::not_empty(sigmas)
 
