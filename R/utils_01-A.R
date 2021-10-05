@@ -38,14 +38,13 @@ prec2sd <- function(x, is_log=FALSE) {
   # must be positive when is_log = FALSE
   if (!is_log & any(x <= 0)) {
     msg_head <- cli::col_yellow("Value must be positive.")
-    msg_body <- c("x" = sprintf("%d non-positive values", sum(x <= 0)))
+    msg_body <- c("x" = sprintf("%d non-positive values.", sum(x <= 0)))
     msg <- paste(msg_head, rlang::format_error_bullets(msg_body), sep = "\n")
     rlang::abort(
       message = msg,
       class = "prec2sd_error")
   }
 
-  # transform
   if (is_log) {
     1 / sqrt(exp(x))
   } else {
@@ -57,23 +56,46 @@ prec2sd <- function(x, is_log=FALSE) {
 #'
 #' Rename strings (row names) from \code{inla} to \code{brms} equivalent.
 #'
-#' @param x Character with \code{inla} strings
+#' Rename variables and names in \code{inla} to be easier to use in plots
+#' and summary by using the \code{brms} as closely as possible. For example
+#' \emph{(Intercept)} becomes \emph{Intercept}, \emph{Beta for A} becomes
+#' \emph{b_A} and \emph{"Precision for the Gaussian observations"} becomes
+#' \emph{Precision}.
 #'
-#' @return Character with inla strings renamed
+#' @param x Character with \code{inla} strings.
+#'
+#' @return Character with inla strings renamed.
 #' @export
+#'
+#' @examples
+#' df <- data.frame(
+#'  x = c(
+#'   NA_character_,
+#'   "Precision for the Gaussian observations",
+#'   "SD for the Gaussian observations",
+#'   "sd for the Gaussian observations",
+#'   "unknown", "(Intercept)",
+#'   "Beta for A", "Beta for B", "Beta for B"),
+#'  y = c(NA_character_,
+#'   "Precision", "Sigma", "Sigma",
+#'   "unknown", "Intercept",
+#'   "b_A","b_B", "b_B"))
+#' z <- rename_inla2brms(df$x)
+#' stopifnot(identical(z, df$y))
 rename_inla2brms <- function(x) {
   checkmate::assert_character(x, min.chars = 1)
 
-  # the regex patterns
-  p <- c("Precision for the Gaussian.+", "Beta for ")
-  # the replacements
-  r <- c("Sigma", "b_")
-  assertthat::assert_that(length(p) == length(r))
+  df <- data.frame(
+    inla = c("^Precision for the Gaussian.+", "^SD for the Gaussian.+",
+             "[(]Intercept[)]","^Beta for "),
+    brms = c("Precision", "Sigma", "Intercept", "b_")
+  )
 
   out <- x  # we use x recursively
-  for (i in seq_along(p)) {
+  for (i in seq_len(nrow(df))) {
     # sub recursively
-    out <- sub(pattern = p[i], replacement = r[i], x = out)
+    out <- sub(pattern = df$inla[i], replacement = df$brms[i],
+               x = out, ignore.case = TRUE)
   }
   out
 }

@@ -4,14 +4,16 @@
 \alias{posterior_marginals}
 \title{Get all marginals from \code{inla}}
 \usage{
-posterior_marginals(.result, is.df = TRUE, var = "var")
+posterior_marginals(.result, out_df = TRUE, var = "var", ren = TRUE)
 }
 \arguments{
 \item{.result}{\code{inla} object.}
 
-\item{is.df}{TRUE: return a data.frame, FALSE: return a list.}
+\item{out_df}{TRUE: return a data.frame, FALSE: return a list.}
 
 \item{var}{Name of extra column with name of the variable in the data.frame.}
+
+\item{ren}{Rename the variable with \code{rename_brms}}
 }
 \value{
 List / data.frame of marginals
@@ -23,4 +25,7 @@ Get all marginals from \code{inla}.
 Extract the hyper and fixed marginals from an \code{inla} object and
 put them in a data.frame when \code{is.df = TRUE} (default), otherwise
 in a list when \code{is.df = FALSE}.
+}
+\seealso{
+rename_brms
 }

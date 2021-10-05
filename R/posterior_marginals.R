@@ -7,15 +7,19 @@
 #' in a list when \code{is.df = FALSE}.
 #'
 #' @param .result \code{inla} object.
-#' @param is.df TRUE: return a data.frame, FALSE: return a list.
+#' @param out_df TRUE: return a data.frame, FALSE: return a list.
 #' @param var Name of extra column with name of the variable in the data.frame.
+#' @param ren Rename the variable with \code{rename_brms}
 #'
 #' @return List / data.frame of marginals
 #' @export
-posterior_marginals <- function(.result, is.df = TRUE, var = "var") {
+#'
+#' @seealso rename_brms
+posterior_marginals <- function(.result, out_df = TRUE, var = "var", ren = TRUE) {
   checkmate::assert_class(.result, classes = "inla")
-  checkmate::assert_logical(is.df)
+  checkmate::assert_logical(out_df)
   checkmate::assert_string(var, min.chars = 1)
+  checkmate::assert_logical(ren)
 
   margs <- list()
 
@@ -27,8 +31,11 @@ posterior_marginals <- function(.result, is.df = TRUE, var = "var") {
   margs$all <- c(.result$marginals.fixed, margs$hyper)
   assertthat::assert_that(length(margs$all) > length(margs$hyper))
 
+  # rename variables using brms naming convention
+  if(ren) names(margs$all) <- rename_inla2brms(names(margs$all))
+
   # output in dataframe format if required
-  if(is.df) {
+  if(out_df) {
     out <- purrr::map_df(margs$all, ~as.data.frame(.x), .id=var)
   } else {
     out <- margs$all

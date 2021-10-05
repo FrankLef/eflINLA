@@ -17,6 +17,9 @@
 #' @return Dataframe with simulated predictions.
 #' @export
 predict_inla <- function(object, pos, n = 1L) {
+
+  # .Defunct(new = "posterior_samples")
+
   checkmate::assert_class(object, classes = "inla")
   checkmate::assert_integerish(pos, lower = 1L, min.len = 1L, unique = TRUE)
   checkmate::assert_count(n, positive = TRUE)

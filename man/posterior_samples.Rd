@@ -4,14 +4,33 @@
 \alias{posterior_samples}
 \title{Sample the posterior using \code{inla.posterior.sample}}
 \usage{
-posterior_samples(.result, is.df = TRUE, var = "var")
+posterior_samples(
+  .result,
+  n = 1L,
+  type = c("post", "fit", "pred"),
+  out_df = TRUE,
+  var = "var",
+  ren = TRUE
+)
 }
 \arguments{
 \item{.result}{\code{inla} object.}
 
-\item{is.df}{TRUE: return a data.frame, FALSE: return a list.}
+\item{n}{Sample size.}
+
+\item{type}{Samples type. One of c("post", "fit", "pred") with the following
+meaning:
+\describe{
+ \item{post}{Get posterior samples, i.e. for variables.}
+ \item{fit}{Get posterior samples with predisctors.}
+ \item{pred}{Get posterior samples with predisctors and variability.}
+}}
+
+\item{out_df}{TRUE: return a data.frame, FALSE: return a list.}
 
 \item{var}{Name of extra column with name of the variable in the data.frame.}
+
+\item{ren}{Rename the variable with \code{rename_brms}}
 }
 \value{
 List / data.frame of samples

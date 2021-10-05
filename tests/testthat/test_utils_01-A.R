@@ -23,7 +23,7 @@ test_that("prec2sd", {
   x <- c(0, 0.1, 1, 2)
   expect_error(prec2sd(x, is_log = FALSE), class = "prec2sd_error")
 
-  # numbers must be positive
+  # test without converting from log scale
   x <- c(0.1, 1, 2)
   y <- prec2sd(x, is_log = FALSE)
   z <- 1 / sqrt(x)
@@ -66,11 +66,20 @@ test_that("prec2sd_marg: log = FALSE", {
 
 test_that("rename_inla2brms", {
 
-  x <- c("Precision for the Gaussian observations", "Beta for A",
-         "unknown", "Beta for B")
+  df <- data.frame(
+    x = c(NA_character_,
+          "Precision for the Gaussian observations",
+          "SD for the Gaussian observations",
+          "sd for the Gaussian observations",
+          "unknown", "(Intercept)",
+          "Beta for A", "Beta for B", "Beta for B"),
+    y = c(NA_character_,
+          "Precision", "Sigma", "Sigma",
+          "unknown", "Intercept",
+          "b_A","b_B", "b_B")
+    )
 
-  y <- rename_inla2brms(x)
+  z <- rename_inla2brms(df$x)
 
-  target <- c("Sigma", "b_A", "unknown", "b_B")
-  expect_identical(y, target)
+  expect_identical(z, df$y)
 })

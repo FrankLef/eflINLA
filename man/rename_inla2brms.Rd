@@ -7,11 +7,34 @@
 rename_inla2brms(x)
 }
 \arguments{
-\item{x}{Character with \code{inla} strings}
+\item{x}{Character with \code{inla} strings.}
 }
 \value{
-Character with inla strings renamed
+Character with inla strings renamed.
 }
 \description{
 Rename strings (row names) from \code{inla} to \code{brms} equivalent.
+}
+\details{
+Rename variables and names in \code{inla} to be easier to use in plots
+and summary by using the \code{brms} as closely as possible. For example
+\emph{(Intercept)} becomes \emph{Intercept}, \emph{Beta for A} becomes
+\emph{b_A} and \emph{"Precision for the Gaussian observations"} becomes
+\emph{Precision}.
+}
+\examples{
+df <- data.frame(
+ x = c(
+  NA_character_,
+  "Precision for the Gaussian observations",
+  "SD for the Gaussian observations",
+  "sd for the Gaussian observations",
+  "unknown", "(Intercept)",
+  "Beta for A", "Beta for B", "Beta for B"),
+ y = c(NA_character_,
+  "Precision", "Sigma", "Sigma",
+  "unknown", "Intercept",
+  "b_A","b_B", "b_B"))
+z <- rename_inla2brms(df$x)
+stopifnot(identical(z, df$y))
 }

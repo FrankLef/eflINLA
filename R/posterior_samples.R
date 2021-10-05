@@ -8,53 +8,166 @@
 #' the hyperparameters is chosen.
 #'
 #' @param .result \code{inla} object.
-#' @param is.df TRUE: return a data.frame, FALSE: return a list.
+#' @param n Sample size.
+#' @param type Samples type. One of c("post", "fit", "pred") with the following
+#' meaning:
+#' \describe{
+#'  \item{post}{Get posterior samples, i.e. for variables.}
+#'  \item{fit}{Get posterior samples with predisctors.}
+#'  \item{pred}{Get posterior samples with predisctors and variability.}
+#' }
+#' @param out_df TRUE: return a data.frame, FALSE: return a list.
 #' @param var Name of extra column with name of the variable in the data.frame.
+#' @param ren Rename the variable with \code{rename_brms}
 #'
 #' @return List / data.frame of samples
 #' @export
-posterior_samples <- function(.result, is.df = TRUE, var = "var") {
+posterior_samples <- function(.result, n = 1L, type = c("post", "fit", "pred"),
+                              out_df = TRUE, var = "var", ren = TRUE) {
   checkmate::assert_class(.result, classes = "inla")
-  checkmate::assert_logical(is.df)
+  checkmate::assert_count(n, positive = TRUE)
+  checkmate::assert_logical(out_df)
   checkmate::assert_string(var, min.chars = 1)
+  checkmate::assert_logical(ren)
 
-  samples <- list()
+  type <- match.arg(arg = type)
 
-  samples
+  # default selection, when type is fit or pred
+  sel <- list("Predictor" = 0L)
+  if(type == "post") sel <- posterior_samples_sel(.result)
+
+
+  # the tags used in the samples are the ones not in the hyperparameters
+  # we create the selection list as a result
+  # sel <- posterior_samples_sel(.result)
+
+  samples <- INLA::inla.posterior.sample(n = n,
+                                         result = .result,
+                                         selection = sel)
+  assertthat::not_empty(samples)
+
+  out <- posterior_samples_list(samples, type = type, sel)
+
+  if(out_df) out <-  as.data.frame(do.call(rbind, out), optional = FALSE)
+
+  out
 }
 
 
-
-
-#' Find which parameter is in the hyperpar section of the sample
+#' Create list to use with \code{INLA::inla.posterior.sample(selection = sel)}
 #'
-#' Find which parameter is in the hyperpar section of the sample.
+#' Create list to use with \code{INLA::inla.posterior.sample(selection = sel)}.
 #'
 #' The parameters could be in the \emph{hyperpar} section of the sample
-#' as well as in the \emph{latent} section.  When this si the case, we take the
-#' value in \emph{hyperpar}.
+#' as well as in the \emph{latent} section.  This happens when then the
+#' parameter is in the f() section of the inla formula. When this is the case,
+#' this function remove form the selection the variables in \emph{hyperpar}.
 #'
-#' @param .result \code{inla} object.
+#' See the documentation \code{INLA::inla.posterior.sample} for more details
+#' on the parameters \code{selection}.
 #'
-#' @return Vector of logical values indicating if the tag is in hyper
+#' @inheritParams posterior_samples
+#' @param excl vector of tags to exclude from the selection list. Represents
+#' the predictors. Default is \code{c("APredictor", "Predictor")}.
+#'
+#' @return List of selected tags and indices
 #' @export
-posterior_samples_tags <- function(.result) {
+#'
+#' @seealso INLA::inla.posterior.sample
+posterior_samples_sel <- function(.result, excl = c("APredictor", "Predictor")) {
   checkmate::assert_class(.result, classes = "inla")
+  checkmate::assert_character(excl, any.missing = FALSE, min.len = 2)
 
-  samples <- INLA::inla.posterior.sample(n = 1, result = .result,
-                                         selection = list("Predictor" = 1))
-  assertthat::not_empty(samples)
-  hypers <- names(samples[[1]]$hyperpar)
+  # the internal tags associated with the hyperparameters
+  hypers <- .result$misc$theta.tags
 
-  # see which parameter is in the hyperparameters
-  # This happens when then the parameter is in the f() section of
-  # the inla formula
+  # the tags associated with the selection of the posterior samples
   tags <- .result$misc$configs$contents$tag
 
-  out <- sapply(X = tags, FUN = function(p) {
-    y <- grepl(pattern = p, x = hypers)
+  out <- sapply(X = tags, FUN = function(tag) {
+    y <- grepl(pattern = tag, x = hypers)
     y <- any(y)
   })
+  assertthat::not_empty(out)
+  msg <- sprintf("All of the %d tags are hyperparameters, impossible!",
+                length(out))
+  assertthat::assert_that(!all(out), msg = msg)
   names(out) <- tags
+
+  # remove exclusion and tags in hyperparameters
+  out <- out[!out]
+  out <- out[!(names(out) %in% excl)]  # remove predictor
+  assertthat::not_empty(out)
+  out[] <- 0L  # 0 means all items for every tag is taken
+  as.list(out)
+}
+
+#' Create list from samples obtained with \code{INLA::inla.posterior.sample}
+#'
+#' Create list from samples obtained with \code{INLA::inla.posterior.sample}.
+#'
+#' Create list where the latent and hyper parameters are joined together
+#' in one vector per sample.  Then the n vectors from the n samples are
+#' put together in a list with n items.
+#'
+#' @inheritParams posterior_samples
+#' @param samples Samples from \code{INLA::inla.posterior.sample}.
+#' @param sel List of selections from \code{posterior_samples_sel}
+#'
+#' @return List of vector. Length of the list is the number of samples.
+#' @export
+#'
+#' @seealso INLA::inla.posterior.sample eflINLA::posterior_samples_sel
+posterior_samples_list <- function(samples, type = c("post", "fit", "pred"),
+                                   sel) {
+  checkmate::assert_list(samples, min.len = 1)
+  checkmate::assert_list(sel, min.len = 1, names = "named")
+
+  type <- match.arg(arg = type)
+
+  out <- list()
+  if(type == "post") {
+
+    # tags of variables to extract
+    tags <- names(sel)
+
+    out <- lapply(X = samples, FUN = function(x) {
+      latent <- as.vector(x$latent)
+      msg <- "Nb of rows in latent matrix is invalid.  Verify if duplicate tags."
+      assertthat::assert_that(length(latent) == length(tags), msg = msg)
+      names(latent) <- tags
+
+      c(latent, x$hyperpar)
+    })
+
+  } else if(type == "fit") {
+
+    out <- lapply(X = samples, FUN = function(x) {
+      latent <- as.vector(x$latent)
+      names(latent) <- rownames(x$latent)
+      latent
+    })
+
+  } else if(type == "pred") {
+
+    out <- lapply(X = samples, FUN = function(x) {
+      latent <- as.vector(x$latent)
+      names(latent) <- rownames(x$latent)
+
+      hyper <- x$hyperpar[1]
+      c(latent, hyper)
+    })
+
+  } else {
+    msg_head <- cli::col_yellow("Type must be in one of the choices.")
+    msg_body <- c("i" = sprintf("Invalid type: %s", type))
+    msg <- paste(msg_head, rlang::format_error_bullets(msg_body), sep = "\n")
+    rlang::abort(
+      message = msg,
+      class = "posterior_samples_list_error")
+  }
+
+  assertthat::not_empty(out)
+
   out
 }
