@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_01-A.R
 \name{rename_inla2brms}
 \alias{rename_inla2brms}
-\title{Rename strings (row names) from \code{inla} to \code{brms} equivalent}
+\title{Rename strings/variable from \code{inla} to \code{brms} equivalent}
 \usage{
 rename_inla2brms(x)
 }
@@ -13,7 +13,7 @@ rename_inla2brms(x)
 Character with inla strings renamed.
 }
 \description{
-Rename strings (row names) from \code{inla} to \code{brms} equivalent.
+Rename strings/variable from \code{inla} to \code{brms} equivalent.
 }
 \details{
 Rename variables and names in \code{inla} to be easier to use in plots

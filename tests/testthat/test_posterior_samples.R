@@ -47,7 +47,7 @@ test_that("posterior_samples: type = post", {
   # cat("\n")
   expect_s3_class(samples, "data.frame")
   expect_identical(dim(samples), c(2L, 3L))
-  nm <- c("(Intercept)", "Precision for the Gaussian observations",
+  nm <- c("(Intercept)", "SD for the Gaussian observations",
           "Beta for weight_c")
   expect_identical(names(samples), nm)
 })

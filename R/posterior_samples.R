@@ -137,7 +137,12 @@ posterior_samples_list <- function(samples, type = c("post", "fit", "pred"),
       assertthat::assert_that(length(latent) == length(tags), msg = msg)
       names(latent) <- tags
 
-      c(latent, x$hyperpar)
+      # get all hyperparameters and convert precision to sd
+      hyper <- x$hyperpar
+      hyper[1] <- prec2sd(hyper[1])
+      names(hyper)[1] <- rename_inla(names(hyper)[1], choice = "Precision")
+
+      c(latent, hyper)
     })
 
   } else if(type == "fit") {
@@ -154,7 +159,11 @@ posterior_samples_list <- function(samples, type = c("post", "fit", "pred"),
       latent <- as.vector(x$latent)
       names(latent) <- rownames(x$latent)
 
+      # get precision and convert it ot sd
       hyper <- x$hyperpar[1]
+      hyper <- prec2sd(hyper)
+      names(hyper) <- rename_inla(names(hyper), choice = "Precision")
+
       c(latent, hyper)
     })
 

@@ -52,9 +52,9 @@ prec2sd <- function(x, is_log=FALSE) {
   }
 }
 
-#' Rename strings (row names) from \code{inla} to \code{brms} equivalent
+#' Rename strings/variable from \code{inla} to \code{brms} equivalent
 #'
-#' Rename strings (row names) from \code{inla} to \code{brms} equivalent.
+#' Rename strings/variable from \code{inla} to \code{brms} equivalent.
 #'
 #' Rename variables and names in \code{inla} to be easier to use in plots
 #' and summary by using the \code{brms} as closely as possible. For example
@@ -97,5 +97,43 @@ rename_inla2brms <- function(x) {
     out <- sub(pattern = df$inla[i], replacement = df$brms[i],
                x = out, ignore.case = TRUE)
   }
+  out
+}
+
+#' Rename inla variables
+#'
+#' Rename inla variables.
+#'
+#' Rename inla variables such as \emph{Precision }to \emph{SD}.
+#'
+#' @param x Character
+#' @param choice Integer, choice of renaming to perform.
+#'
+#' @return Modified character
+#' @export
+#'
+#' @examples
+#' x <- "Precision for the Gaussian observations"
+#' y <- rename_inla(x, choice = "Precision")
+#' stopifnot(identical(y, "SD for the Gaussian observations"))
+rename_inla <- function(x, choice = c(NA_character_, "Precision")) {
+
+  choice <- match.arg(choice)
+
+  out <- x
+  if(is.na(choice)) {
+    # do nothing when choice == 0
+  } else if(choice == "Precision") {
+    out <- sub(pattern = "Precision", replacement = "SD", x = out,
+               ignore.case = TRUE)
+  } else {
+    msg_head <- cli::col_yellow("choice must be in one of the choices.")
+    msg_body <- c("i" = sprintf("Invalid choice: %s", choice))
+    msg <- paste(msg_head, rlang::format_error_bullets(msg_body), sep = "\n")
+    rlang::abort(
+      message = msg,
+      class = "rename_inla_error")
+  }
+
   out
 }

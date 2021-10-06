@@ -83,3 +83,16 @@ test_that("rename_inla2brms", {
 
   expect_identical(z, df$y)
 })
+
+
+test_that("rename_inla", {
+
+  x <- "test"
+  y <- rename_inla(x)
+  expect_identical(y, x)
+
+  x <- "Precision for the Gaussian observations"
+  y <- rename_inla(x, choice = "Precision")
+
+  expect_identical(y, "SD for the Gaussian observations")
+})
