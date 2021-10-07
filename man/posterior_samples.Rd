@@ -44,3 +44,6 @@ of the intercept, parameters, precision and hyperparameters. When the
 parameters is found in the hyperparameters instead of the \emph{latent} section
 the hyperparameters is chosen.
 }
+\seealso{
+INLA::inla.posterior.sample
+}

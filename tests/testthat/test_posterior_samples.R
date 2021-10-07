@@ -34,6 +34,8 @@ test_that("posterior_samples_list", {
   # cat("\n")
   # str(lst)
   # cat("\n")
+
+  # skip("manual")
   expect_length(lst, nsamples)
 })
 
@@ -49,6 +51,7 @@ test_that("posterior_samples: type = post", {
   expect_identical(dim(samples), c(2L, 3L))
   nm <- c("(Intercept)", "SD for the Gaussian observations",
           "Beta for weight_c")
+  # skip("manual")
   expect_identical(names(samples), nm)
 })
 
@@ -63,7 +66,9 @@ test_that("posterior_samples: type = fit", {
   # print(samples)
   # cat("\n")
 
+  # skip("manual")
   expect_s3_class(samples, "data.frame")
+  # skip("manual")
   expect_identical(dim(samples), c(nsamples, nrow(i04M07ctr$.args$data)))
 })
 
@@ -77,6 +82,8 @@ test_that("posterior_samples: type = pred", {
   # print(samples)
   # cat("\n")
 
+  # skip("manual")
   expect_s3_class(samples, "data.frame")
+  # skip("manual")
   expect_identical(dim(samples), c(nsamples, nrow(i04M07ctr$.args$data) + 1L))
 })

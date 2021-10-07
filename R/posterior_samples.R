@@ -22,6 +22,8 @@
 #'
 #' @return List / data.frame of samples
 #' @export
+#'
+#' @seealso INLA::inla.posterior.sample
 posterior_samples <- function(.result, n = 1L, type = c("post", "fit", "pred"),
                               out_df = TRUE, var = "var", ren = TRUE) {
   checkmate::assert_class(.result, classes = "inla")
@@ -81,24 +83,49 @@ posterior_samples_sel <- function(.result, excl = c("APredictor", "Predictor")) 
   # the internal tags associated with the hyperparameters
   hypers <- .result$misc$theta.tags
 
-  # the tags associated with the selection of the posterior samples
-  tags <- .result$misc$configs$contents$tag
+  # identify tags associated with the selection of the posterior samples
+  latents <- .result$misc$configs$contents$tag
 
-  out <- sapply(X = tags, FUN = function(tag) {
-    y <- grepl(pattern = tag, x = hypers)
+  # flag the tag which are also in the hyperparameters
+  tags <- sapply(X = latents, FUN = function(x) {
+    y <- grepl(pattern = x, x = hypers)
     y <- any(y)
   })
-  assertthat::not_empty(out)
-  msg <- sprintf("All of the %d tags are hyperparameters, impossible!",
-                length(out))
-  assertthat::assert_that(!all(out), msg = msg)
-  names(out) <- tags
+  assertthat::assert_that(length(tags) == length(latents))
+  names(tags) <- latents
 
-  # remove exclusion and tags in hyperparameters
-  out <- out[!out]
-  out <- out[!(names(out) %in% excl)]  # remove predictor
+  # identify tags related to exclusions (predictors)
+  tags[names(tags) %in% excl] <- NA
+
+  # At least one tags must not be an hyperparameters (e.g. (Intercept))
+  if(all(tags, na.rm = TRUE)) {
+    msg <- "At least one tags must not be an hyperparameters, e.g. (Intercept)."
+    msg_head <- cli::col_yellow(msg)
+    msg_body <- c("i" = sprintf("Latent tags: %s", tags[!is.na(tags)]))
+    msg <- paste(msg_head, rlang::format_error_bullets(msg_body), sep = "\n")
+    rlang::abort(
+      message = msg,
+      class = "posterior_samples_sel_error1")
+    }
+
+  # all latent tags not in hyperparameters must have a count of one
+  cnt <- .result$misc$configs$contents$length
+  cnt <- cnt[!is.na(tags) & !tags]
+  if(any(cnt != 1L)) {
+    msg <- "All latent tags not in hyperparameters must have a count of one"
+    msg_head <- cli::col_yellow(msg)
+    msg_body <- c("i" = sprintf("Latent tags count: %s", cnt))
+    msg <- paste(msg_head, rlang::format_error_bullets(msg_body), sep = "\n")
+    rlang::abort(
+      message = msg,
+      class = "posterior_samples_sel_error2")
+  }
+
+  # remove excl (predictors) and tags in hyperparameters
+  out <- tags[!is.na(tags) & !tags]
   assertthat::not_empty(out)
   out[] <- 0L  # 0 means all items for every tag is taken
+
   as.list(out)
 }
 
@@ -159,10 +186,13 @@ posterior_samples_list <- function(samples, type = c("post", "fit", "pred"),
       latent <- as.vector(x$latent)
       names(latent) <- rownames(x$latent)
 
-      # get precision and convert it ot sd
+      # get precision and convert it to sd
       hyper <- x$hyperpar[1]
       hyper <- prec2sd(hyper)
       names(hyper) <- rename_inla(names(hyper), choice = "Precision")
+
+      # add variability to predictors
+      latent <- rnorm(n = length(latent), mean = latent, sd = hyper)
 
       c(latent, hyper)
     })
