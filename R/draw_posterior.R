@@ -20,17 +20,17 @@
 #' @param var Name of extra column with name of the variable in the data.frame.
 #' @param ren Rename the variable with \code{rename_brms}
 #'
+#' @seealso INLA::inla.posterior.sample
+#'
 #' @return List / data.frame of samples
 #' @export
-#'
-#' @seealso INLA::inla.posterior.sample
-posterior_samples <- function(.result, n = 1L, type = c("post", "fit", "pred"),
+draw_posterior <- function(.result, n = 1L, type = c("post", "fit", "pred"),
                               out_df = TRUE, var = "var", ren = TRUE) {
-  checkmate::assert_class(.result, classes = "inla")
+  checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
   checkmate::assert_count(n, positive = TRUE)
-  checkmate::assert_logical(out_df)
+  checkmate::assert_flag(out_df)
   checkmate::assert_string(var, min.chars = 1)
-  checkmate::assert_logical(ren)
+  checkmate::assert_flag(ren)
 
   type <- match.arg(arg = type)
 
@@ -38,19 +38,21 @@ posterior_samples <- function(.result, n = 1L, type = c("post", "fit", "pred"),
   sel <- list("Predictor" = 0L)
   if(type == "post") sel <- posterior_samples_sel(.result)
 
-
-  # the tags used in the samples are the ones not in the hyperparameters
-  # we create the selection list as a result
-  # sel <- posterior_samples_sel(.result)
-
+  # get the posterior samples
   samples <- INLA::inla.posterior.sample(n = n,
                                          result = .result,
                                          selection = sel)
   assertthat::not_empty(samples)
 
-  out <- posterior_samples_list(samples, type = type, sel)
+  out <- extract_posterior_samples(samples, type = type, sel)
+  # cat("\n", sprintf("inside %s", type), "\n")
+  # str(out)
+  # cat("\n")
 
-  if(out_df) out <-  as.data.frame(do.call(rbind, out), optional = FALSE)
+  # rename variables using brms naming convention
+  if(ren) colnames(out) <- rename_inla2brms(colnames(out))
+
+  out <- posterior::as_draws_rvars(out)
 
   out
 }
@@ -68,16 +70,16 @@ posterior_samples <- function(.result, n = 1L, type = c("post", "fit", "pred"),
 #' See the documentation \code{INLA::inla.posterior.sample} for more details
 #' on the parameters \code{selection}.
 #'
-#' @inheritParams posterior_samples
+#' @inheritParams draw_posterior
 #' @param excl vector of tags to exclude from the selection list. Represents
 #' the predictors. Default is \code{c("APredictor", "Predictor")}.
 #'
+#' @seealso INLA::inla.posterior.sample
+#'
 #' @return List of selected tags and indices
 #' @export
-#'
-#' @seealso INLA::inla.posterior.sample
 posterior_samples_sel <- function(.result, excl = c("APredictor", "Predictor")) {
-  checkmate::assert_class(.result, classes = "inla")
+  checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
   checkmate::assert_character(excl, any.missing = FALSE, min.len = 2)
 
   # the internal tags associated with the hyperparameters
@@ -137,28 +139,28 @@ posterior_samples_sel <- function(.result, excl = c("APredictor", "Predictor")) 
 #' in one vector per sample.  Then the n vectors from the n samples are
 #' put together in a list with n items.
 #'
-#' @inheritParams posterior_samples
+#' @inheritParams draw_posterior
 #' @param samples Samples from \code{INLA::inla.posterior.sample}.
 #' @param sel List of selections from \code{posterior_samples_sel}
 #'
+#' @seealso INLA::inla.posterior.sample eflINLA::posterior_samples_sel
+#'
 #' @return List of vector. Length of the list is the number of samples.
 #' @export
-#'
-#' @seealso INLA::inla.posterior.sample eflINLA::posterior_samples_sel
-posterior_samples_list <- function(samples, type = c("post", "fit", "pred"),
+extract_posterior_samples <- function(samples, type = c("post", "fit", "pred"),
                                    sel) {
   checkmate::assert_list(samples, min.len = 1)
   checkmate::assert_list(sel, min.len = 1, names = "named")
 
   type <- match.arg(arg = type)
 
-  out <- list()
+  lst <- list()
   if(type == "post") {
 
     # tags of variables to extract
     tags <- names(sel)
 
-    out <- lapply(X = samples, FUN = function(x) {
+    lst <- lapply(X = samples, FUN = function(x) {
       latent <- as.vector(x$latent)
       msg <- "Nb of rows in latent matrix is invalid.  Verify if duplicate tags."
       assertthat::assert_that(length(latent) == length(tags), msg = msg)
@@ -174,7 +176,7 @@ posterior_samples_list <- function(samples, type = c("post", "fit", "pred"),
 
   } else if(type == "fit") {
 
-    out <- lapply(X = samples, FUN = function(x) {
+    lst <- lapply(X = samples, FUN = function(x) {
       latent <- as.vector(x$latent)
       names(latent) <- rownames(x$latent)
       latent
@@ -182,9 +184,8 @@ posterior_samples_list <- function(samples, type = c("post", "fit", "pred"),
 
   } else if(type == "pred") {
 
-    out <- lapply(X = samples, FUN = function(x) {
+    lst <- lapply(X = samples, FUN = function(x) {
       latent <- as.vector(x$latent)
-      names(latent) <- rownames(x$latent)
 
       # get precision and convert it to sd
       hyper <- x$hyperpar[1]
@@ -192,7 +193,8 @@ posterior_samples_list <- function(samples, type = c("post", "fit", "pred"),
       names(hyper) <- rename_inla(names(hyper), choice = "Precision")
 
       # add variability to predictors
-      latent <- rnorm(n = length(latent), mean = latent, sd = hyper)
+      latent <- stats::rnorm(n = length(latent), mean = latent, sd = hyper)
+      names(latent) <- rownames(x$latent)
 
       c(latent, hyper)
     })
@@ -205,8 +207,11 @@ posterior_samples_list <- function(samples, type = c("post", "fit", "pred"),
       message = msg,
       class = "posterior_samples_list_error")
   }
+  assertthat::not_empty(lst)
 
-  assertthat::not_empty(out)
+  # convert the list of samples to a list of variables
+  # to be used by posterior::as_draws_rvars()
+  out <- do.call(rbind, lst)
 
   out
 }

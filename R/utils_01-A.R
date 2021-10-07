@@ -14,6 +14,7 @@
 #' @return precision converted to standard deviation using marginal
 #' @export
 prec2sd_marg <- function(marg, is_log = FALSE) {
+  checkmate::assert_flag(is_log)
   INLA::inla.tmarginal(fun = function(x) prec2sd(x, is_log = is_log),
                        marginal = marg, n = nrow(marg))
 }
@@ -34,6 +35,7 @@ prec2sd_marg <- function(marg, is_log = FALSE) {
 #' @export
 prec2sd <- function(x, is_log=FALSE) {
   checkmate::assert_numeric(x, finite = TRUE)
+  checkmate::assert_flag(is_log)
 
   # must be positive when is_log = FALSE
   if (!is_log & any(x <= 0)) {

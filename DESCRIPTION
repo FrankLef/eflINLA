@@ -24,4 +24,5 @@ Imports:
     purrr (>= 0.3.4),
     modelr (>= 0.1.8),
     cli (>= 2.1.0),
+    posterior (>= 1.1.0),
     INLA (>= 21.02.23)

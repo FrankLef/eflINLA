@@ -1,4 +1,6 @@
 # declarations ------------------------------------------------------------
+library(posterior, quietly = TRUE)
+
 
 # the inla objects used
 i04M07ctr <- readRDS(test_path("testdata", "fits", "i04M07ctr.rds"))
@@ -30,60 +32,65 @@ test_that("posterior_samples_list", {
                                          selection = sel)
 
   # get the samples in list format
-  lst <- posterior_samples_list(samples, type = "post", sel)
+  post <- extract_posterior_samples(samples, type = "post", sel)
   # cat("\n")
-  # str(lst)
+  # str(post)
   # cat("\n")
 
   # skip("manual")
-  expect_length(lst, nsamples)
+  expect_identical(dim(post), c(2L, 3L))
 })
 
-test_that("posterior_samples: type = post", {
+test_that("draw_posterior: type = post", {
   nsamples <- 2L
 
   # get the samples in list format
-  samples <- posterior_samples(i04M07ctr, n = nsamples, type = "post")
+  samples <- draw_posterior(i04M07ctr, n = nsamples, type = "post")
   # cat("\n")
   # str(samples)
   # cat("\n")
-  expect_s3_class(samples, "data.frame")
-  expect_identical(dim(samples), c(2L, 3L))
-  nm <- c("(Intercept)", "SD for the Gaussian observations",
-          "Beta for weight_c")
   # skip("manual")
-  expect_identical(names(samples), nm)
+  expect_s3_class(samples, "draws_rvars")
+
+  # skip("manual")
+  # nm <- c("(Intercept)", "SD for the Gaussian observations",
+  #         "Beta for weight_c")
+  nm <- c("Intercept", "Sigma", "b_weight_c")
+  expect_identical(variables(samples), nm)
+  expect_equal(niterations(samples), nsamples)
 })
 
 
-test_that("posterior_samples: type = fit", {
+test_that("draw_posterior: type = fit", {
 
   nsamples <- 2L
 
   # get the samples in list format
-  samples <- posterior_samples(i04M07ctr, n = nsamples, type = "fit")
+  samples <- draw_posterior(i04M07ctr, n = nsamples, type = "fit")
   # cat("\n")
   # print(samples)
   # cat("\n")
 
   # skip("manual")
-  expect_s3_class(samples, "data.frame")
+  expect_s3_class(samples, "draws_rvars")
   # skip("manual")
-  expect_identical(dim(samples), c(nsamples, nrow(i04M07ctr$.args$data)))
+  expect_equal(nvariables(samples), nrow(i04M07ctr$.args$data))
+  expect_equal(niterations(samples), nsamples)
 })
 
-test_that("posterior_samples: type = pred", {
+test_that("draw_posterior: type = pred", {
 
   nsamples <- 2L
 
   # get the samples in list format
-  samples <- posterior_samples(i04M07ctr, n = nsamples, type = "pred")
+  samples <- draw_posterior(i04M07ctr, n = nsamples, type = "pred")
   # cat("\n")
   # print(samples)
   # cat("\n")
 
   # skip("manual")
-  expect_s3_class(samples, "data.frame")
+  expect_s3_class(samples, "draws_rvars")
   # skip("manual")
-  expect_identical(dim(samples), c(nsamples, nrow(i04M07ctr$.args$data) + 1L))
+  expect_equal(nvariables(samples), nrow(i04M07ctr$.args$data) + 1)
+  expect_equal(niterations(samples), nsamples)
 })
