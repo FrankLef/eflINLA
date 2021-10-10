@@ -22,30 +22,12 @@ test_that("posterior_samples_sel", {
   expect_identical(sel, list("(Intercept)" = 0L))
 })
 
-test_that("posterior_samples_list", {
-  nsamples <- 2L
 
-  sel <- sel <- posterior_samples_sel(i04M07ctr)
-
-  samples <- INLA::inla.posterior.sample(n = nsamples,
-                                         result = i04M07ctr,
-                                         selection = sel)
-
-  # get the samples in list format
-  post <- extract_posterior_samples(samples, type = "post", sel)
-  # cat("\n")
-  # str(post)
-  # cat("\n")
-
-  # skip("manual")
-  expect_identical(dim(post), c(2L, 3L))
-})
-
-test_that("draw_posterior: type = post", {
+test_that("tidy_draws_inla", {
   nsamples <- 2L
 
   # get the samples in list format
-  samples <- draw_posterior(i04M07ctr, n = nsamples, type = "post")
+  samples <- tidy_draws_inla(i04M07ctr, n = nsamples)
   # cat("\n")
   # str(samples)
   # cat("\n")
@@ -60,13 +42,14 @@ test_that("draw_posterior: type = post", {
   expect_equal(niterations(samples), nsamples)
 })
 
-
-test_that("draw_posterior: type = fit", {
+test_that("linpred_draws_inla: pred = FALSE", {
 
   nsamples <- 2L
 
   # get the samples in list format
-  samples <- draw_posterior(i04M07ctr, n = nsamples, type = "fit")
+  # samples <- draw_posterior(i04M07ctr, n = nsamples, type = "fit")
+  samples <- linpred_draws_inla(i04M07ctr, n = nsamples, ren = TRUE,
+                                       sel = list("Predictor" = 0L))
   # cat("\n")
   # print(samples)
   # cat("\n")
@@ -74,16 +57,19 @@ test_that("draw_posterior: type = fit", {
   # skip("manual")
   expect_s3_class(samples, "draws_rvars")
   # skip("manual")
-  expect_equal(nvariables(samples), nrow(i04M07ctr$.args$data))
+  expect_equal(nvariables(samples), nrow(i04M07ctr$.args$data) + 1)
   expect_equal(niterations(samples), nsamples)
 })
 
-test_that("draw_posterior: type = pred", {
+test_that("linpred_draws_inla: pred = TRUE", {
 
   nsamples <- 2L
 
   # get the samples in list format
-  samples <- draw_posterior(i04M07ctr, n = nsamples, type = "pred")
+  # samples <- draw_posterior(i04M07ctr, n = nsamples, type = "pred")
+  samples <- linpred_draws_inla(i04M07ctr, n = nsamples, ren = TRUE,
+                                       pred = TRUE,
+                                       sel = list("Predictor" = 0L))
   # cat("\n")
   # print(samples)
   # cat("\n")

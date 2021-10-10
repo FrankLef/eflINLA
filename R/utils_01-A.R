@@ -14,9 +14,20 @@
 #' @return precision converted to standard deviation using marginal
 #' @export
 prec2sd_marg <- function(marg, is_log = FALSE) {
+  checkmate::assert_double(marg)
   checkmate::assert_flag(is_log)
-  INLA::inla.tmarginal(fun = function(x) prec2sd(x, is_log = is_log),
-                       marginal = marg, n = nrow(marg))
+
+  # WARNING: Don't use custom function inside INLA::inla.tmarginal.
+  # Otherwise annoying warnings are issued and are very hard to track
+  # to their source.
+
+  if (is_log) {
+    INLA::inla.tmarginal(fun = function(x) 1 / sqrt(exp(x)),
+                         marginal = marg, n = nrow(marg))
+  } else {
+    INLA::inla.tmarginal(fun = function(x) 1 / sqrt(x),
+                         marginal = marg, n = nrow(marg))
+  }
 }
 
 
@@ -33,19 +44,22 @@ prec2sd_marg <- function(marg, is_log = FALSE) {
 #'
 #' @return precision converted to standard deviation
 #' @export
-prec2sd <- function(x, is_log=FALSE) {
+prec2sd <- function(x, is_log = FALSE) {
   checkmate::assert_numeric(x, finite = TRUE)
   checkmate::assert_flag(is_log)
 
   # must be positive when is_log = FALSE
-  if (!is_log & any(x <= 0)) {
-    msg_head <- cli::col_yellow("Value must be positive.")
-    msg_body <- c("x" = sprintf("%d non-positive values.", sum(x <= 0)))
-    msg <- paste(msg_head, rlang::format_error_bullets(msg_body), sep = "\n")
-    rlang::abort(
-      message = msg,
-      class = "prec2sd_error")
-  }
+  # is_nonpos <- sapply(X = x, FUN = function(v) any(v <= 0))
+  # is_nonpos <- any(is_nonpos)
+  # message(is_nonpos)
+  # if (!is_log & any(is_nonpos)) {
+  #   msg_head <- cli::col_yellow("Value must be positive.")
+  #   msg_body <- c("x" = sprintf("%d non-positive values.", sum(x <= 0)))
+  #   msg <- paste(msg_head, rlang::format_error_bullets(msg_body), sep = "\n")
+  #   rlang::abort(
+  #     message = msg,
+  #     class = "prec2sd_error")
+  # }
 
   if (is_log) {
     1 / sqrt(exp(x))
@@ -123,7 +137,7 @@ rename_inla <- function(x, choice = c(NA_character_, "Precision")) {
   choice <- match.arg(choice)
 
   out <- x
-  if(is.na(choice)) {
+  if(isTRUE(is.na(choice))) {
     # do nothing when choice == 0
   } else if(choice == "Precision") {
     out <- sub(pattern = "Precision", replacement = "SD", x = out,

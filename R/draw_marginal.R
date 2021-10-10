@@ -12,7 +12,7 @@
 #'
 #' @return List / data.frame of marginals
 #' @export
-draw_marginal <- function(.result, n = nrow(.result$marginals.fixed[[1]]),
+marginal_draws_inla <- function(.result, n = nrow(.result$marginals.fixed[[1]]),
                           ren = TRUE, repl = TRUE) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
   checkmate::assert_count(n, positive = TRUE)
@@ -38,7 +38,7 @@ draw_marginal <- function(.result, n = nrow(.result$marginals.fixed[[1]]),
 #' put them in a data.frame when \code{is.df = TRUE} (default), otherwise
 #' in a list when \code{is.df = FALSE}.
 #'
-#' @inheritParams draw_marginal
+#' @inheritParams marginal_draws_inla
 #'
 #' @return List / data.frame of marginals
 #' @export
@@ -100,15 +100,7 @@ transform_marginal_hyper <- function(.result) {
     .result$internal.marginals.hyperpar,
     SIMPLIFY = FALSE)
 
-  # edit the names to replace "precision" by sd_name
-  # names(margs) <- sub(pattern = prec_rgx, replacement = sd_name,
-  #                     x = names(margs), ignore.case = TRUE)
-  # cat("\n", "inside transform_marginal_hyper", "\n")
-  # str(margs)
-  # cat("\n")
-  # cat("\n", "inside transform_marginal_hyper - rename", "\n")
-  # print(rename_inla(names(margs), choice = "Precision"))
-  # cat("\n")
+  # edit the names to replace "precision" by "SD"
   names(margs) <- rename_inla(names(margs), choice = "Precision")
   margs
 }

@@ -35,9 +35,9 @@ test_that("extract_marginal", {
   expect_identical(names(marg), nm)
 })
 
-test_that("draw_marginal", {
+test_that("marginal_draws_inla", {
 
-  samples <- draw_marginal(i04M07ctr)
+  samples <- marginal_draws_inla(i04M07ctr)
   cat("\n")
   # print(samples)
   # print(nvariables(samples))
