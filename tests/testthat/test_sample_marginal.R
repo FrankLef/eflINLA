@@ -2,7 +2,6 @@
 library(posterior, quietly = TRUE)
 
 
-
 # the inla objects used
 i04M07ctr <- readRDS(test_path("testdata", "fits", "i04M07ctr.rds"))
 
@@ -24,9 +23,9 @@ test_that("transform_marginal_hyper", {
   expect_identical(names(marg), nm)
 })
 
-test_that("extract_marginal", {
+test_that("extract_marginals", {
 
-  marg <- extract_marginal(i04M07ctr)
+  marg <- extract_marginals(i04M07ctr)
   # cat("\n", str(marg), "\n")
 
   expect_type(marg, "list")
@@ -35,10 +34,10 @@ test_that("extract_marginal", {
   expect_identical(names(marg), nm)
 })
 
-test_that("marginal_draws_inla", {
+test_that("tidy_marg_draws_inla", {
 
-  samples <- marginal_draws_inla(i04M07ctr)
-  cat("\n")
+  samples <- tidy_marg_draws_inla(i04M07ctr)
+  # cat("\n")
   # print(samples)
   # print(nvariables(samples))
   # cat("\n")

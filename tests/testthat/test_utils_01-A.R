@@ -19,11 +19,6 @@ test_that("prec2sd", {
   expect_identical(y, z)
 
   # test with is_log = FALSE
-  # numbers must be positive
-  x <- c(0, 0.1, 1, 2)
-  expect_error(prec2sd(x, is_log = FALSE), class = "prec2sd_error")
-
-  # test without converting from log scale
   x <- c(0.1, 1, 2)
   y <- prec2sd(x, is_log = FALSE)
   z <- 1 / sqrt(x)

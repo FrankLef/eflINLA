@@ -1,25 +1,25 @@
-#' Get all marginals from \code{inla} and simulate a sample
+#' Get fixed and hyper marginals from \code{inla}
 #'
-#' Get all marginals from \code{inla} and simulate a sample.
+#' Get fixed and hyper marginals from \code{inla}.
 #'
 #' Extract the hyper and fixed marginals from an \code{inla} object and
-#' put simulate a sample of size n.
+#' bind them in a \code{draws_rvars} object..
 #'
 #' @param .result \code{inla} object
 #' @param n Sample size.
 #' @param ren Rename the variable with \code{rename_brms}
 #' @param repl TRUE: Sampling with replacement; FALSE: no replacement.
 #'
-#' @return List / data.frame of marginals
+#' @return \code{draws_rvars} object.
 #' @export
-marginal_draws_inla <- function(.result, n = nrow(.result$marginals.fixed[[1]]),
+tidy_marg_draws_inla <- function(.result, n = nrow(.result$marginals.fixed[[1]]),
                           ren = TRUE, repl = TRUE) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
   checkmate::assert_count(n, positive = TRUE)
   checkmate::assert_flag(ren)
   checkmate::assert_flag(repl)
 
-  margs <- extract_marginal(.result, ren = ren)
+  margs <- extract_marginals(.result, ren = ren)
 
   out <- lapply(X = margs, FUN = function(x) {
     sample(x = x[, "x"], size = n, replace = repl, prob = x[, "y"])
@@ -38,11 +38,11 @@ marginal_draws_inla <- function(.result, n = nrow(.result$marginals.fixed[[1]]),
 #' put them in a data.frame when \code{is.df = TRUE} (default), otherwise
 #' in a list when \code{is.df = FALSE}.
 #'
-#' @inheritParams marginal_draws_inla
+#' @inheritParams tidy_marg_draws_inla
 #'
-#' @return List / data.frame of marginals
+#' @return List of marginals
 #' @export
-extract_marginal <- function(.result, ren = TRUE) {
+extract_marginals <- function(.result, ren = TRUE) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
   checkmate::assert_flag(ren)
 
@@ -72,7 +72,7 @@ extract_marginal <- function(.result, ren = TRUE) {
 #'
 #' @param .result inla object.
 #'
-#' @return List of hyperparameter marginals transformed to user scale
+#' @return List of hyperparameter marginals.
 #' @export
 transform_marginal_hyper <- function(.result) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
@@ -103,4 +103,12 @@ transform_marginal_hyper <- function(.result) {
   # edit the names to replace "precision" by "SD"
   names(margs) <- rename_inla(names(margs), choice = "Precision")
   margs
+}
+
+linpred_marg_draws_inla <- function(.result, newdata) {
+
+}
+
+predicted_marg_draws_inla <- function(.result, newdata) {
+
 }
