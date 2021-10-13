@@ -14,17 +14,17 @@ test_that("verify inla model object", {
   expect_s3_class(i04M07ctr, "inla")
 })
 
-test_that("get_newdata_inla: Input errors.", {
+test_that("create_newdata_inla: Input errors.", {
   # dataframe without the rows
   df <- runif(n = 10)
   rgx <- "Assertion on 'newdata' failed"
-  expect_error(get_newdata_inla(i04M07ctr, newdata = df), regexp = rgx)
+  expect_error(create_newdata_inla(i04M07ctr, newdata = df), regexp = rgx)
 
   # the names are not a subset of the original names
   df <- the_newdata
   names(df) <- c("WRONG1", "WRONG2")
   rgx <- "Assertion on 'names[(]newdata[)]' failed"
-  expect_error(get_newdata_inla(i04M07ctr, newdata = df), regexp = rgx)
+  expect_error(create_newdata_inla(i04M07ctr, newdata = df), regexp = rgx)
 })
 
 
@@ -33,7 +33,7 @@ test_that("create_newdata_inla: Empty newdata.", {
   df <- i04M07ctr$.args$data[FALSE, ]
   out <- create_newdata_inla(i04M07ctr, newdata = df)
   expect_identical(out, list("data" = i04M07ctr$.args$data,
-                             "newdata_pos" = integer()))
+                             "new_pos" = integer()))
 })
 
 
@@ -42,12 +42,12 @@ test_that("create_newdata_inla", {
   out <- create_newdata_inla(i04M07ctr, newdata = the_newdata)
 
   expect_type(out, type = "list")
-  expect_identical(names(out), c("data", "newdata_pos"))
+  expect_identical(names(out), c("data", "new_pos"))
 
   # check the vector of new position
   the_pos <- (nrow(i04M07ctr$.args$data) + 1):(nrow(i04M07ctr$.args$data) +
                                                  nrow(the_newdata))
-  expect_identical(out$newdata_pos, the_pos)
+  expect_identical(out$new_pos, the_pos)
 
 
   # check the inla data
@@ -61,18 +61,38 @@ test_that("create_newdata_inla", {
 })
 
 
+test_that("augment_inla: Input errors.", {
+  # dataframe without the rows
+  df <- runif(n = 10)
+  rgx <- "Assertion on 'newdata' failed"
+  expect_error(augment_inla(i04M07ctr, newdata = df), regexp = rgx)
 
-test_that("get_newdata_inla", {
+  # the names are not a subset of the original names
+  df <- the_newdata
+  names(df) <- c("WRONG1", "WRONG2")
+  rgx <- "Assertion on 'names[(]newdata[)]' failed"
+  expect_error(augment_inla(i04M07ctr, newdata = df), regexp = rgx)
+})
 
-  out <- get_newdata_inla(i04M07ctr, newdata = the_newdata)
+test_that("augment_inla: Empty newdata.", {
+  # dataframe without the rows
+  df <- i04M07ctr$.args$data[FALSE, ]
+  out <- augment_inla(i04M07ctr, newdata = df)
+  expect_identical(out, list("inla" = i04M07ctr, "new_pos" = integer()))
+})
+
+
+test_that("augment_inla", {
+
+  out <- augment_inla(i04M07ctr, newdata = the_newdata)
 
   expect_type(out, type = "list")
-  expect_identical(names(out), c("inla", "newdata_pos"))
+  expect_identical(names(out), c("inla", "new_pos"))
 
   # check the vector of new position
   the_pos <- (nrow(i04M07ctr$.args$data) + 1):(nrow(i04M07ctr$.args$data) +
                                                  nrow(the_newdata))
-  expect_identical(out$newdata_pos, the_pos)
+  expect_identical(out$new_pos, the_pos)
 
 
   # check the inla

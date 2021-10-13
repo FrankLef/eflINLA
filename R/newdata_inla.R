@@ -15,7 +15,7 @@
 #'  {newdata_pos}{positions of the newdata.}
 #' }
 #' @export
-get_newdata_inla <- function(.result, newdata) {
+augment_inla <- function(.result, newdata) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
   checkmate::assert_names(names(.result$.args), must.include = "data")
   checkmate::assert_data_frame(newdata)
@@ -28,7 +28,7 @@ get_newdata_inla <- function(.result, newdata) {
   # get the new data and vector of positions
   lst <- create_newdata_inla(.result, newdata)
   data <- lst$data
-  new_pos <- lst$newdata_pos
+  new_pos <- lst$new_pos
 
   if(length(new_pos)) {
     # update the list of parameters to be able to use with inla
@@ -41,7 +41,7 @@ get_newdata_inla <- function(.result, newdata) {
   }
 
 
-  list("inla" = the_inla, "newdata_pos" = new_pos )
+  list("inla" = the_inla, "new_pos" = new_pos )
 }
 
 #' Create a new data set using \code{inla$.args$data} and \code{newdata}
@@ -78,10 +78,10 @@ create_newdata_inla <- function(.result, newdata) {
     newdata_types <- sapply(X = newdata, FUN = typeof)
     if (all(newdata_types %in% data_types)) {
 
-      # get the position of the new data in the output
+      # get the positions of the new data in the output
       new_pos <- (nrow(data) + 1L):(nrow(data) + nrow(newdata))
       assertthat::not_empty(new_pos)
-      assertthat::assert_that(all(new_pos >= 2))
+      assertthat::assert_that(all(new_pos >= 2L))
 
       # create the newdata which
       #  - must have the same columns and types as the original data
@@ -89,10 +89,21 @@ create_newdata_inla <- function(.result, newdata) {
       new_cols <- names(data)[!(names(data) %in% names(newdata))]
       extra_newdata <- data[FALSE, new_cols]
       extra_newdata <- as.data.frame(
-        lapply(X = extra_newdata, function(x) rep(NA, length.out = nrow(newdata)))
-      )
+        lapply(X = extra_newdata, function(x) {
+          type <- typeof(x)
+          na_val <- switch(type,
+                           "double" = NA_real_,
+                           "integer" = NA_integer_,
+                           "character" = NA_character_,
+                           "complex" = NA_complex_,
+                           NA)
+          rep(na_val, length.out = nrow(newdata))
+        }
+        ))
+
       assertthat::assert_that(nrow(extra_newdata) == nrow(newdata))
       extra_newdata <- cbind(extra_newdata, newdata)
+
       assertthat::assert_that(all(names(extra_newdata) %in% names(data)))
       extra_newdata <- extra_newdata[names(data)]  # reorder to original data
 
@@ -113,5 +124,5 @@ create_newdata_inla <- function(.result, newdata) {
       }
     }
 
-  list("data" = data, "newdata_pos" = new_pos )
+  list("data" = data, "new_pos" = new_pos )
 }
