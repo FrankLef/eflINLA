@@ -28,16 +28,41 @@ test_that("get_newdata_inla: Input errors.", {
 })
 
 
-test_that("get_newdata_inla: Empty newdata.", {
+test_that("create_newdata_inla: Empty newdata.", {
   # dataframe without the rows
   df <- i04M07ctr$.args$data[FALSE, ]
-  expect_message(get_newdata_inla(i04M07ctr, newdata = df),
-                 class = "get_newdata_inla_message1")
-  expect_identical(get_newdata_inla(i04M07ctr, newdata = df),
-                  list("inla" = i04M07ctr, "newdata_pos" = integer()))
+  out <- create_newdata_inla(i04M07ctr, newdata = df)
+  expect_identical(out, list("data" = i04M07ctr$.args$data,
+                             "newdata_pos" = integer()))
 })
 
-test_that("get_newdata_inla: ", {
+
+test_that("create_newdata_inla", {
+
+  out <- create_newdata_inla(i04M07ctr, newdata = the_newdata)
+
+  expect_type(out, type = "list")
+  expect_identical(names(out), c("data", "newdata_pos"))
+
+  # check the vector of new position
+  the_pos <- (nrow(i04M07ctr$.args$data) + 1):(nrow(i04M07ctr$.args$data) +
+                                                 nrow(the_newdata))
+  expect_identical(out$newdata_pos, the_pos)
+
+
+  # check the inla data
+  expect_s3_class(out$data, class = "data.frame")
+  # the names must be the sae as the original data
+  expect_identical(names(out$data), names(i04M07ctr$.args$data))
+  the_dim <- c(nrow(i04M07ctr$.args$data) + nrow(the_newdata),
+               length(i04M07ctr$.args$data))
+  # nb of rows must be increased by new rows
+  expect_identical(dim(out$data), the_dim)
+})
+
+
+
+test_that("get_newdata_inla", {
 
   out <- get_newdata_inla(i04M07ctr, newdata = the_newdata)
 
@@ -47,11 +72,11 @@ test_that("get_newdata_inla: ", {
   # check the vector of new position
   the_pos <- (nrow(i04M07ctr$.args$data) + 1):(nrow(i04M07ctr$.args$data) +
                                                  nrow(the_newdata))
-  expect_identical(out[[2]], the_pos)
+  expect_identical(out$newdata_pos, the_pos)
 
 
   # check the inla
-  result <- out[[1]]
+  result <- out$inla
   expect_s3_class(result, class = "inla")
   # the names must be the sae as the original data
   expect_identical(names(result$.args$data), names(i04M07ctr$.args$data))
