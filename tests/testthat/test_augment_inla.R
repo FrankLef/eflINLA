@@ -8,6 +8,11 @@ the_newdata <- data.frame(
   weight_c = modelr::seq_range(i04M07ctr$.args$data$weight_c, n = 10)
   )
 
+# create and save augmented inla for use later
+# i04M07ctr_aug <- augment_inla(i04M07ctr, newdata = the_newdata)
+# saveRDS(i04M07ctr_aug, file = test_path("testdata", "fits", "i04M07ctr_aug.rds"))
+
+
 # tests -------------------------------------------------------------------
 
 test_that("verify inla model object", {

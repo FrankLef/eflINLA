@@ -10,6 +10,7 @@
 #' When \code{pred = TRUE} this is the equivalent of \code{predicted_draws}.
 #'
 #' @param .result \code{inla} object.
+#' @param new_pos Integer of positions of \code{newdata}.
 #' @param n Sample size.
 #' @param ren TRUE:rename variables to \code{brms} naming convention;
 #' FALSE: Keep \code{INLA} naming convention.
@@ -22,16 +23,29 @@
 #'
 #' @return \code{draws_rvars} object.
 #' @export
-linpred_draws_inla <- function(.result, n = 1L, ren = TRUE,
-                               sel = list("APredictor" = 0L, "Predictor" = 0L),
-                               pred = FALSE) {
+linpred_draws_inla <- function(.result, new_pos = integer(), n = 1L,
+                               pred = FALSE, ren = TRUE, sel = NULL) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
+  checkmate::assert_integer(new_pos)
+  checkmate::assert_flag(pred)
   checkmate::assert_count(n, positive = TRUE)
   checkmate::assert_flag(ren)
-  checkmate::assert_list(sel, min.len = 1)
-  checkmate::assert_flag(pred)
+  checkmate::assert_list(sel, null.ok = TRUE)
 
-  # get the posterior samples
+  # get the default selection
+  # the selection choices are list("APredictor" = 0L, "Predictor" = 0L)
+  if (is.null(sel)) {
+    if (length(new_pos)) {
+      sel <- list("Predictor" = new_pos)
+      # alternative choice
+      # sel <- list("APredictor" = new_pos, "Predictor" = new_pos)
+    } else {
+      sel <- list("Predictor" = 0L)
+      # alternative choice
+      # sel <- list("APredictor" = 0L, "Predictor" = 0L)
+    }
+  }
+
   samples <- INLA::inla.posterior.sample(n = n,  result = .result,
                                          selection = sel)
   assertthat::not_empty(samples)

@@ -3,7 +3,9 @@
 #' Get fixed and hyper marginals from \code{inla}.
 #'
 #' Extract the hyper and fixed marginals from an \code{inla} object and
-#' bind them in a \code{draws_rvars} object..
+#' bind them in a \code{draws_rvars} object. The fixed parameter marginals
+#' are obtained from \code{marginals.fixed}. The hyperparameters are obtained
+#' by \code{marginals.hyperpar}.
 #'
 #' @param .result \code{inla} object
 #' @param n Sample size.
@@ -103,12 +105,4 @@ transform_marginal_hyper <- function(.result) {
   # edit the names to replace "precision" by "SD"
   names(margs) <- rename_inla(names(margs), choice = "Precision")
   margs
-}
-
-linpred_marg_draws_inla <- function(.result, newdata) {
-
-}
-
-predicted_marg_draws_inla <- function(.result, newdata) {
-
 }

@@ -6,25 +6,28 @@
 \usage{
 linpred_draws_inla(
   .result,
+  new_pos = integer(),
   n = 1L,
+  pred = FALSE,
   ren = TRUE,
-  sel = list(APredictor = 0L, Predictor = 0L),
-  pred = FALSE
+  sel = NULL
 )
 }
 \arguments{
 \item{.result}{\code{inla} object.}
 
+\item{new_pos}{Integer of positions of \code{newdata}.}
+
 \item{n}{Sample size.}
+
+\item{pred}{TRUE: Add variability to the predictors to make them predictions;
+FALSE: Keep predictors as is.}
 
 \item{ren}{TRUE:rename variables to \code{brms} naming convention;
 FALSE: Keep \code{INLA} naming convention.}
 
 \item{sel}{List used for selection by
 \code{INLA::inla.posterior.sample(selection = sel)}.}
-
-\item{pred}{TRUE: Add variability to the predictors to make them predictions;
-FALSE: Keep predictors as is.}
 }
 \value{
 \code{draws_rvars} object.

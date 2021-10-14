@@ -28,5 +28,7 @@ Get fixed and hyper marginals from \code{inla}.
 }
 \details{
 Extract the hyper and fixed marginals from an \code{inla} object and
-bind them in a \code{draws_rvars} object..
+bind them in a \code{draws_rvars} object. The fixed parameter marginals
+are obtained from \code{marginals.fixed}. The hyperparameters are obtained
+by \code{marginals.hyperpar}.
 }

@@ -1,9 +1,13 @@
-#' Run \code{inla} with new data to obtain new predictors
+#' Run \code{inla} with new data to obtain new predictors and their positions
 #'
-#' Run \code{inla} with new data to obtain new predictors.
+#' Run \code{inla} with new data to obtain new predictors and their positions.
 #'
 #' Run \code{inla} with new data to allow the use of \code{summary.linear.predictor},
-#' \code{summary.fitted.values}, \code{marginlas.linear.predictor}, etc.
+#' \code{summary.fitted.values}, \code{marginlas.linear.predictor}, etc. Then
+#' put it in a list with the positions of the newdata described just below.
+#' This function is necessary because \code{INLA} always keep the original data,
+#' as a result we constantly use the row position of the new data when extracting
+#' linear predictors, expected predictors (fitted values), etc.
 #'
 #' @param .result \code{inla} object.
 #' @param newdata Dataframe of new data.  The column with the response
@@ -12,7 +16,7 @@
 #' @return List with the following items
 #' \describe{
 #'  {inla}{updated \code{inla} object.}
-#'  {newdata_pos}{positions of the newdata.}
+#'  {new_pos}{positions of the newdata.}
 #' }
 #' @export
 augment_inla <- function(.result, newdata) {
@@ -58,7 +62,7 @@ augment_inla <- function(.result, newdata) {
 #' @return List with the following items
 #' \describe{
 #'  {data}{augmented \code{inla$.args$data} with \code{newdata}.}
-#'  {newdata_pos}{positions of the newdata.}
+#'  {new_pos}{positions of the newdata.}
 #' }
 #' @export
 create_newdata_inla <- function(.result, newdata) {
