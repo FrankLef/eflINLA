@@ -2,7 +2,7 @@
 % Please edit documentation in R/sample_marginal.R
 \name{extract_marginals}
 \alias{extract_marginals}
-\title{Get all marginals from \code{inla}}
+\title{Extract all marginals from \code{inla}}
 \usage{
 extract_marginals(.result, ren = TRUE)
 }
@@ -15,10 +15,9 @@ extract_marginals(.result, ren = TRUE)
 List of marginals
 }
 \description{
-Get all marginals from \code{inla}.
+Extract all marginals from \code{inla}.
 }
 \details{
 Extract the hyper and fixed marginals from an \code{inla} object and
-put them in a data.frame when \code{is.df = TRUE} (default), otherwise
-in a list when \code{is.df = FALSE}.
+put them in a list.
 }

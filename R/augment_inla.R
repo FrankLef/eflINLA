@@ -45,7 +45,7 @@ augment_inla <- function(.result, newdata) {
   }
 
 
-  list("inla" = the_inla, "new_pos" = new_pos )
+  list("inla" = the_inla, "new_pos" = new_pos)
 }
 
 #' Create a new data set using \code{inla$.args$data} and \code{newdata}

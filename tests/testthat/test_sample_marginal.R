@@ -12,14 +12,17 @@ test_that("verify inla model object", {
   expect_s3_class(i04M07ctr, "inla")
 })
 
-test_that("transform_marginal_hyper", {
+test_that("extract_marginals_hyper", {
 
-  marg <- transform_marginal_hyper(i04M07ctr)
+  marg <- extract_marginals_hyper(i04M07ctr)
+  # cat("\n")
+  # str(marg)
+  # cat("\n")
 
 
   expect_type(marg, "list")
   expect_length(marg, 2)
-  nm <- c("SD for the Gaussian observations", "Beta for weight_c")
+  nm <- c("Beta for weight_c", "SD for the Gaussian observations")
   expect_identical(names(marg), nm)
 })
 
@@ -30,7 +33,7 @@ test_that("extract_marginals", {
 
   expect_type(marg, "list")
   expect_length(marg, 3)
-  nm <- c("Intercept", "Sigma","b_weight_c")
+  nm <- c("Intercept","b_weight_c", "Sigma")
   expect_identical(names(marg), nm)
 })
 
@@ -45,7 +48,7 @@ test_that("tidy_marg_draws_inla", {
 
 
   expect_s3_class(samples, "draws_rvars")
-  nm <- c("Intercept", "Sigma","b_weight_c")
+  nm <- c("Intercept","b_weight_c", "Sigma")
   expect_identical(variables(samples), nm)
   expect_equal(niterations(samples), nrow(i04M07ctr$marginals.fixed[[1]]))
 })

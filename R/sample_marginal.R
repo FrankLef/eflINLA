@@ -32,13 +32,12 @@ tidy_marg_draws_inla <- function(.result, n = nrow(.result$marginals.fixed[[1]])
 }
 
 
-#' Get all marginals from \code{inla}
+#' Extract all marginals from \code{inla}
 #'
-#' Get all marginals from \code{inla}.
+#' Extract all marginals from \code{inla}.
 #'
 #' Extract the hyper and fixed marginals from an \code{inla} object and
-#' put them in a data.frame when \code{is.df = TRUE} (default), otherwise
-#' in a list when \code{is.df = FALSE}.
+#' put them in a list.
 #'
 #' @inheritParams tidy_marg_draws_inla
 #'
@@ -51,7 +50,7 @@ extract_marginals <- function(.result, ren = TRUE) {
   margs <- list()
 
   # get the transformed marginals for hyperparameters
-  margs$hyper <- transform_marginal_hyper(.result)
+  margs$hyper <- extract_marginals_hyper(.result)
   assertthat::not_empty(margs$hyper)
 
   # the list of all marginals (fixed and hyper)
@@ -65,22 +64,19 @@ extract_marginals <- function(.result, ren = TRUE) {
 }
 
 
-#' Transform the hyperparameters' marginal
+#' Extract the hyperparameters' marginals
 #'
-#' Transform the hyperparameters' marginal.
+#' Extract the hyperparameters' marginals.
 #'
 #' Convert the precision used in the hyperparameers' marginals to standard
-#' deviations.
+#' deviations and extract other hyperparametrs' marginals as is.
 #'
-#' @param .result inla object.
+#' @inheritParams tidy_marg_draws_inla
 #'
 #' @return List of hyperparameter marginals.
 #' @export
-transform_marginal_hyper <- function(.result) {
+extract_marginals_hyper <- function(.result) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
-  checkmate::assert_names(names(.result),
-                          must.include = c("marginals.hyperpar",
-                                           "internal.marginals.hyperpar"))
 
   # don't modify this without a good reason and test it
   # the regex pattern used to find the "precision"
@@ -104,5 +100,9 @@ transform_marginal_hyper <- function(.result) {
 
   # edit the names to replace "precision" by "SD"
   names(margs) <- rename_inla(names(margs), choice = "Precision")
+
+  # put precision/SD at the end to enable comparisons with other packages
+  if(length(margs) > 1) margs <- append(margs[2:length(margs)], margs[1])
+
   margs
 }

@@ -6,30 +6,20 @@
 #' in one vector per sample.  Then each vector from the \code{n} samples are
 #' put together in a \code{draws_rvars} object.
 #'
-#' When \code{pred = FALSE} this is the equivalent of \code{linpred_draws}.
-#' When \code{pred = TRUE} this is the equivalent of \code{predicted_draws}.
-#'
 #' @param .result \code{inla} object.
-#' @param new_pos Integer of positions of \code{newdata}.
+#' @param new_pos Integer of positions of \code{newdata}.◙
 #' @param n Sample size.
-#' @param ren TRUE:rename variables to \code{brms} naming convention;
-#' FALSE: Keep \code{INLA} naming convention.
 #' @param sel List used for selection by
 #' \code{INLA::inla.posterior.sample(selection = sel)}.
-#' @param pred TRUE: Add variability to the predictors to make them predictions;
-#' FALSE: Keep predictors as is.
 #'
 #' @seealso INLA::inla.posterior.sample
 #'
 #' @return \code{draws_rvars} object.
 #' @export
-linpred_draws_inla <- function(.result, new_pos = integer(), n = 1L,
-                               pred = FALSE, ren = TRUE, sel = NULL) {
+predict_inla <- function(.result, new_pos = integer(), n = 1L, sel = NULL) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
   checkmate::assert_integer(new_pos)
-  checkmate::assert_flag(pred)
   checkmate::assert_count(n, positive = TRUE)
-  checkmate::assert_flag(ren)
   checkmate::assert_list(sel, null.ok = TRUE)
 
   # get the default selection
@@ -59,17 +49,19 @@ linpred_draws_inla <- function(.result, new_pos = integer(), n = 1L,
     names(hyper) <- rename_inla(names(hyper), choice = "Precision")
 
     # add variability to predictors when required
-    if(pred) latent <- stats::rnorm(n = length(latent), mean = latent,
-                                    sd = hyper)
+    latent <- stats::rnorm(n = length(latent), mean = latent, sd = hyper[[1]])
     names(latent) <- rownames(x$latent)
 
-    c(latent, hyper)
+    # c(latent, hyper)  # do not keep hyper, used for debugging
+    latent
   })
   assertthat::not_empty(out)
   out <- do.call(rbind, out)
 
+  # remove the sigma
+
   # rename variables using brms naming convention
-  if(ren) colnames(out) <- rename_inla2brms(colnames(out))
+  # if(ren) colnames(out) <- rename_inla2brms(colnames(out))
 
   posterior::as_draws_rvars(out)
 }
