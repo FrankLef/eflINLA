@@ -37,7 +37,7 @@ test_that("tidy_draws_inla", {
   # skip("manual")
   # nm <- c("(Intercept)", "SD for the Gaussian observations",
   #         "Beta for weight_c")
-  nm <- c("Intercept", "Sigma", "b_weight_c")
+  nm <- c("b_Intercept", "sigma", "b_weight_c")
   expect_identical(variables(samples), nm)
   expect_equal(niterations(samples), nsamples)
 })

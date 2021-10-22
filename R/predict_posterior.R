@@ -7,7 +7,7 @@
 #' put together in a \code{draws_rvars} object.
 #'
 #' @param .result \code{inla} object.
-#' @param new_pos Integer of positions of \code{newdata}.◙
+#' @param new_pos Integer of positions of \code{newdata}.
 #' @param n Sample size.
 #' @param sel List used for selection by
 #' \code{INLA::inla.posterior.sample(selection = sel)}.

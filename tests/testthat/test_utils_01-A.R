@@ -69,8 +69,8 @@ test_that("rename_inla2brms", {
           "unknown", "(Intercept)",
           "Beta for A", "Beta for B", "Beta for B"),
     y = c(NA_character_,
-          "Precision", "Sigma", "Sigma",
-          "unknown", "Intercept",
+          "Precision", "sigma", "sigma",
+          "unknown", "b_Intercept",
           "b_A","b_B", "b_B")
     )
 

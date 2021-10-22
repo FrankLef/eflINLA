@@ -33,7 +33,7 @@ test_that("extract_marginals", {
 
   expect_type(marg, "list")
   expect_length(marg, 3)
-  nm <- c("Intercept","b_weight_c", "Sigma")
+  nm <- c("b_Intercept","b_weight_c", "sigma")
   expect_identical(names(marg), nm)
 })
 
@@ -48,7 +48,7 @@ test_that("tidy_marg_draws_inla", {
 
 
   expect_s3_class(samples, "draws_rvars")
-  nm <- c("Intercept","b_weight_c", "Sigma")
+  nm <- c("b_Intercept","b_weight_c", "sigma")
   expect_identical(variables(samples), nm)
   expect_equal(niterations(samples), nrow(i04M07ctr$marginals.fixed[[1]]))
 })

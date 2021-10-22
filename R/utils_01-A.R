@@ -93,8 +93,8 @@ prec2sd <- function(x, is_log = FALSE) {
 #'   "unknown", "(Intercept)",
 #'   "Beta for A", "Beta for B", "Beta for B"),
 #'  y = c(NA_character_,
-#'   "Precision", "Sigma", "Sigma",
-#'   "unknown", "Intercept",
+#'   "Precision", "sigma", "sigma",
+#'   "unknown", "b_Intercept",
 #'   "b_A","b_B", "b_B"))
 #' z <- rename_inla2brms(df$x)
 #' stopifnot(identical(z, df$y))
@@ -104,7 +104,7 @@ rename_inla2brms <- function(x) {
   df <- data.frame(
     inla = c("^Precision for the Gaussian.+", "^SD for the Gaussian.+",
              "[(]Intercept[)]","^Beta for "),
-    brms = c("Precision", "Sigma", "Intercept", "b_")
+    brms = c("Precision", "sigma", "b_Intercept", "b_")
   )
 
   out <- x  # we use x recursively
