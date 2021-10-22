@@ -26,4 +26,5 @@ Imports:
     modelr (>= 0.1.8),
     cli (>= 2.1.0),
     posterior (>= 1.1.0),
+    lme4 (>= 1.1-27.1),
     INLA (>= 21.02.23)

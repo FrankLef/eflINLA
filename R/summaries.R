@@ -29,20 +29,22 @@ get_summary <- function(marg, probs = c(0.025, 0.975)) {
 
 }
 
-calc_summary <- function(marg, dit = c("normal", "lognormal",
+calc_summary <- function(marg, dist = c("normal", "lognormal",
                                        "exponential", "gamma",
                                        "poisson")) {
 
   dist <- match.arg(dist)
 
-  val <- inla.emarginal(function(x) c(x, x^2), marg)
+  # print(marg)
+  val <- inla.emarginal(function(val) c(val, val^2), marg)
 
-  calc <- switch(dist,
+  out <- switch(dist,
                  "normal" = {
                    m <- val[1]
                    s <- sqrt(val[2] - val[1]^2)
                    c("mean" = m, "sd" = s)},
-                 val
+                stopifnot("STOP")
+                # val
                  )
-  calc
+  out
 }

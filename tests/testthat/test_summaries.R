@@ -59,4 +59,26 @@ test_that("verify inla model object", {
   expect_s3_class(sim$inla, "inla")
 })
 
+test_that("calc_summary: normal",{
+  # marg <- sim$inla$internal.marginals.hyperpar
+  # pos <- grep(pattern = "precision", x = names(marg))
 
+  marg <- sim$inla$marginals.fixed
+  # print(names(marg))
+  pos <- grep(pattern = "x_normal", x = names(marg))
+  marg <- marg[[pos]]
+
+  # print(sim$def)
+  # print(sim$def[sim$def$varname == "x_normal", "formula"])
+
+  lm_coefs <- c("estimate" = coef(sim$lm),
+                "sd" = coef(summary(sim$lm))["x_normal","Std. Error"])
+  # print(lm_coefs)
+
+  out <- calc_summary(marg, dist = "normal")
+  # print(out)
+
+  expect_type(out, "double")
+  expect_identical(names(out), c("mean", "sd"))
+  expect_equivalent(out, lm_coefs, tolerance = 10e-4)
+})
