@@ -12,11 +12,11 @@ tidy_marg_draws_inla(
 )
 }
 \arguments{
-\item{.result}{\code{inla} object}
+\item{.result}{\code{inla} object.}
 
 \item{n}{Sample size.}
 
-\item{ren}{Rename the variable with \code{rename_brms}}
+\item{ren}{Rename the variable with \code{rename_brms}.}
 
 \item{repl}{TRUE: Sampling with replacement; FALSE: no replacement.}
 }

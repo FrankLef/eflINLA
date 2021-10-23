@@ -9,7 +9,7 @@ predict_inla(.result, new_pos = integer(), n = 1L, sel = NULL)
 \arguments{
 \item{.result}{\code{inla} object.}
 
-\item{new_pos}{Integer of positions of \code{newdata}.◙}
+\item{new_pos}{Integer of positions of \code{newdata}.}
 
 \item{n}{Sample size.}
 
