@@ -18,3 +18,13 @@ Compute the moments of a marginal.
 \details{
 Compute the moments of a marginal from \code{inla} using its densities .
 }
+\examples{
+df <- data.frame(
+ x1 = rnorm(50, mean = 1, sd = 0.5),
+ x2 = rnorm(50, mean = 2, sd = 1),
+ sigma = rexp(50, rate = 1))
+df$mu <- df$x1 + df$x2
+df$y <- rnorm(nrow(df), mean = df$mu, sd = df$sigma)
+the_fit <- INLA::inla(formula = y ~ x1 + x2, data = df)
+calc_moments_inla(the_fit$marginals.fixed[[1]])
+}

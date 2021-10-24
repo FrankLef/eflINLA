@@ -44,7 +44,7 @@ test_that("calc_moments_inla: x_normal",{
   expect_equivalent(out[2], linest[2], tolerance = 1e-3)
 })
 
-test_that("posterior_marg_summary_inla_one: x_normal",{
+test_that("posterior_summary_inla_one: x_normal",{
 
   # get the mean and sd from the marginal
   probs <- c(0.025, 0.975)
@@ -52,7 +52,7 @@ test_that("posterior_marg_summary_inla_one: x_normal",{
   margs <- extract_marginals(sim1$inla)
   pos <- grep(pattern = "x_normal", x = names(margs))
   marg <- margs[[pos]]
-  out <- posterior_marg_summary_inla_one(marg, probs)
+  out <- posterior_summary_inla_one(marg, probs)
   # cli::cat_line("\n", "inla", col = "orange")
   # print(out)
 
@@ -90,7 +90,7 @@ test_that("calc_moments_inla: x_explog",{
 })
 
 
-test_that("posterior_marg_summary_inla_one: x_explog",{
+test_that("posterior_summary_inla_one: x_explog",{
 
   # get the mean and sd from the marginal
   the_probs <- c(0.025, 0.975)
@@ -98,7 +98,7 @@ test_that("posterior_marg_summary_inla_one: x_explog",{
   margs <- extract_marginals(sim2$inla)
   pos <- grep(pattern = "x_explog", x = names(margs))
   marg <- margs[[pos]]
-  out <- posterior_marg_summary_inla_one(marg, probs = the_probs)
+  out <- posterior_summary_inla_one(marg, probs = the_probs)
   # cli::cat_line("\n", "inla", col = "orange")
   # print(out)
 
@@ -114,7 +114,7 @@ test_that("posterior_marg_hyper_summmary_inla: sim3", {
   names(the_probs) <- paste0("Q", the_probs)
 
 
-  out <- posterior_marg_summmary_inla(the_inla, probs = the_probs)
+  out <- posterior_summmary_inla(the_inla, probs = the_probs)
   # cli::cat_line("\n", "inla summary", col = "orange")
   # print(out)
 
