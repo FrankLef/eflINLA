@@ -20,8 +20,8 @@
 #' df$mu <- df$x1 + df$x2
 #' df$y <- rnorm(nrow(df), mean = df$mu, sd = df$sigma)
 #' the_fit <- INLA::inla(formula = y ~ x1 + x2, data = df)
-#' posterior_summmary_inla(the_fit)
-posterior_summmary_inla <- function(.result, probs = c(0.025, 0.975),
+#' posterior_summary_inla(the_fit)
+posterior_summary_inla <- function(.result, probs = c(0.025, 0.975),
                                     ren = TRUE) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
   checkmate::assert_numeric(probs, lower = 0, upper = 1, unique = TRUE)
@@ -65,9 +65,8 @@ posterior_summmary_inla <- function(.result, probs = c(0.025, 0.975),
 #' posterior_summary_inla_one(the_fit$marginals.fixed[[1]])
 posterior_summary_inla_one <- function(marg, probs = c(0.025, 0.975)) {
   mom <- calc_moments_inla(marg)
-  nms <- paste0("Q", probs)
   quant = as.vector(INLA::inla.qmarginal(marginal = marg, p = probs))
-  names(quant) <- nms
+  names(quant) <- paste0("Q", probs)
   md = as.vector(INLA::inla.mmarginal(marg))
   c(mom, quant, "mode" = md)
 }

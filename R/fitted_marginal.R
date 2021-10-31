@@ -2,13 +2,18 @@
 #'
 #' Draw linear predictors from \code{marginals.linear.predictor}.
 #'
-#' Draw linear predictors using marginals.
+#' Draw linear predictors using marginals. Use \code{augment_inla} to be able
+#' to provide an inla object with the position of the new data. Use the
+#' \code{eflINLA::augment_inla} to ensure your inla and newdata parameters
+#' are using the right input.
 #'
 #' @param .result \code{inla} object.
 #' @param new_pos Integer of positions of \code{newdata}.
 #' @param n Sample size (per predictor).
 #' @param ren TRUE: rename using \code{brms} naming convention.
 #' @param repl TRUE: Sampling with replacement.
+#'
+#' @seealso eflINLA::augment_inla
 #'
 #' @return \code{posterior::draws_rvars} object where every variable is a
 #' linear predictor.
@@ -39,13 +44,18 @@ linpred_marg_draws_inla <- function(.result, new_pos = integer(),
 #'
 #' Draw expected predictors from \code{marginals.fitted.values}.
 #'
-#' Draw expected predictors using marginals.
+#' Draw expected predictors using marginals. Use \code{augment_inla} to be able
+#' to provide an inla object with the position of the new data. Use the
+#' \code{eflINLA::augment_inla} to ensure your inla and newdata parameters
+#' are using the right input.
 #'
 #' @param .result \code{inla} object.
 #' @param new_pos Integer of positions of \code{newdata}.
 #' @param n Sample size (per predictor).
 #' @param ren TRUE: rename using \code{brms} naming convention.
 #' @param repl TRUE: Sampling with replacement.
+#'
+#' @seealso eflINLA::augment_inla
 #'
 #' @return \code{posterior::draws_rvars} object where every variable is a
 #' fitted predictor.

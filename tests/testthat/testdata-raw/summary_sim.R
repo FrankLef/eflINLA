@@ -17,7 +17,7 @@ sim$defs <- defData(sim$defs, varname = "y", dist = "normal",
 
 # sim1 normal -------------------------------------------------------------
 # NOTE: For some reason updateDef gives error message
-#       "Data definition des not exist" when using a list!
+#       "Data definition does not exist" when using a list!
 defs <- sim$defs
 sim$defs <- updateDef(defs, changevar = "mu", newformula = "x_normal")
 # sim$defs

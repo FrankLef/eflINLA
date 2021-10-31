@@ -2,7 +2,7 @@
 % Please edit documentation in R/augment_inla.R
 \name{augment_inla}
 \alias{augment_inla}
-\title{Run \code{inla} with new data to obtain new predictors and their positions}
+\title{Run \code{inla} with new data and give list of new predictors' positions}
 \usage{
 augment_inla(.result, newdata)
 }
@@ -15,18 +15,41 @@ augment_inla(.result, newdata)
 \value{
 List with the following items
 \describe{
- {inla}{updated \code{inla} object.}
- {new_pos}{positions of the newdata.}
+ \item{inla}{updated \code{inla} object.}
+ \item{new_pos}{integer() of newdata positions.}
 }
 }
 \description{
-Run \code{inla} with new data to obtain new predictors and their positions.
+Run \code{inla} with new data and give list of new predictors' positions.
 }
 \details{
 Run \code{inla} with new data to allow the use of \code{summary.linear.predictor},
-\code{summary.fitted.values}, \code{marginlas.linear.predictor}, etc. Then
+\code{summary.fitted.values}, \code{marginals.linear.predictor}, etc. Then
 put it in a list with the positions of the newdata described just below.
 This function is necessary because \code{INLA} always keep the original data,
 as a result we constantly use the row position of the new data when extracting
-linear predictors, expected predictors (fitted values), etc.
+linear predictors, expected predictors (fitted values), etc. More specifically,
+this function will
+\itemize{
+  \item merge data with newdata
+  \item create a vector with the newdata's position in the inla data
+  \item set \code{control.predictor = list(compute = TRUE)}
+  \item set \code{offset <- NULL} to avoid error message
+  \item set \code{control.compute = list(config = TRUE)}, otherwise
+   error from \code{INLA::inla.posterior.sample}.
+}
+}
+\examples{
+the_data <- data.frame(
+ x1 = rnorm(20, mean = 1, sd = 0.5),
+ x2 = rnorm(20, mean = 2, sd = 1),
+ sigma = rexp(20))
+the_data$mu <- the_data$x1 + the_data$x2
+the_data$y <- rnorm(nrow(the_data), mean = the_data$mu, sd = the_data$sigma)
+the_inla <- INLA::inla(formula = y ~ x1 + x2, data = the_data)
+# the new data used for fitted/predicted values
+the_newdata <- data.frame(
+ x1 = modelr::seq_range(the_data$x1, n = 5),
+ x2 = modelr::seq_range(the_data$x2, n = 5))
+augment_inla(the_inla, newdata = the_newdata)
 }

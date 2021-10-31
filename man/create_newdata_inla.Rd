@@ -15,8 +15,8 @@ create_newdata_inla(.result, newdata)
 \value{
 List with the following items
 \describe{
- {data}{augmented \code{inla$.args$data} with \code{newdata}.}
- {new_pos}{positions of the newdata.}
+ \item{data}{augmented \code{inla$.args$data} with \code{newdata}.}
+ \item{new_pos}{positions of the newdata.}
 }
 }
 \description{

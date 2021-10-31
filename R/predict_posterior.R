@@ -2,9 +2,14 @@
 #'
 #' Get predictors from samples obtained with \code{INLA::inla.posterior.sample}.
 #'
-#' Create list where the predictors are joined together
-#' in one vector per sample.  Then each vector from the \code{n} samples are
-#' put together in a \code{draws_rvars} object.
+#' Extract posterior predictors (as opposed to the ones from marginals) from
+#' an inla object, add variability to them using the standard deviation shown
+#' in each sample \code{INLA::inla.posterior.sample} of size \code{n} and
+#' output these randomized predictors as \code{posterior::draws_vars} objects.
+#'
+#' When creating the input inla object, use \code{eflINLA::augment_inla} to
+#' ensure the data is formatted the right way and inla arguments are properly
+#' set.
 #'
 #' @param .result \code{inla} object.
 #' @param new_pos Integer of positions of \code{newdata}.
@@ -12,11 +17,11 @@
 #' @param sel List used for selection by
 #' \code{INLA::inla.posterior.sample(selection = sel)}.
 #'
-#' @seealso INLA::inla.posterior.sample
+#' @seealso INLA::inla.posterior.sample eflINLA::augment_inla
 #'
 #' @return \code{draws_rvars} object.
 #' @export
-predict_inla <- function(.result, new_pos = integer(), n = 1L, sel = NULL) {
+predicted_draws_inla <- function(.result, new_pos = integer(), n = 1L, sel = NULL) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
   checkmate::assert_integer(new_pos)
   checkmate::assert_count(n, positive = TRUE)
@@ -48,7 +53,7 @@ predict_inla <- function(.result, new_pos = integer(), n = 1L, sel = NULL) {
     hyper <- prec2sd(hyper)
     names(hyper) <- rename_inla(names(hyper), choice = "Precision")
 
-    # add variability to predictors when required
+    # add variability to predictors
     latent <- stats::rnorm(n = length(latent), mean = latent, sd = hyper[[1]])
     names(latent) <- rownames(x$latent)
 
@@ -57,11 +62,6 @@ predict_inla <- function(.result, new_pos = integer(), n = 1L, sel = NULL) {
   })
   assertthat::not_empty(out)
   out <- do.call(rbind, out)
-
-  # remove the sigma
-
-  # rename variables using brms naming convention
-  # if(ren) colnames(out) <- rename_inla2brms(colnames(out))
 
   posterior::as_draws_rvars(out)
 }

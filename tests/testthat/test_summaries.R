@@ -108,13 +108,13 @@ test_that("posterior_summary_inla_one: x_explog",{
 
 
 
-test_that("posterior_marg_hyper_summmary_inla: sim3", {
+test_that("posterior_marg_hyper_summary_inla: sim3", {
   the_inla <- sim3$inla
   the_probs <- c(0.025, 0.975)
   names(the_probs) <- paste0("Q", the_probs)
 
 
-  out <- posterior_summmary_inla(the_inla, probs = the_probs)
+  out <- posterior_summary_inla(the_inla, probs = the_probs)
   # cli::cat_line("\n", "inla summary", col = "orange")
   # print(out)
 
