@@ -6,7 +6,6 @@
 #' \code{brms::posterior_summary}.
 #'
 #' @param .result \code{inla} object.
-#' @param probs Percentiles returned by the summary.
 #' @param ren Rename the variable with \code{rename_brms}.
 #'
 #' @return Dataframe with summaries.
@@ -21,10 +20,8 @@
 #' df$y <- rnorm(nrow(df), mean = df$mu, sd = df$sigma)
 #' the_fit <- INLA::inla(formula = y ~ x1 + x2, data = df)
 #' posterior_summary_inla(the_fit)
-posterior_summary_inla <- function(.result, probs = c(0.025, 0.975),
-                                    ren = TRUE) {
+posterior_summary_inla <- function(.result, ren = TRUE) {
   checkmate::assert_class(.result, classes = "inla", ordered = TRUE)
-  checkmate::assert_numeric(probs, lower = 0, upper = 1, unique = TRUE)
   checkmate::assert_flag(ren)
 
   # get all marginals
@@ -32,7 +29,7 @@ posterior_summary_inla <- function(.result, probs = c(0.025, 0.975),
 
   # create the summary line for each marginal
   summs <- lapply(X = margs, FUN = function(marg) {
-    posterior_summary_inla_one(marg, probs = probs)
+    posterior_summary_inla_one(marg, probs = .result$.args$quantiles)
   })
 
   out <- as.data.frame(do.call(rbind, summs))
@@ -45,11 +42,12 @@ posterior_summary_inla <- function(.result, probs = c(0.025, 0.975),
 #'
 #' Create one line summary for a given marginal.
 #'
-#' Create one line summary using the marginal funcitons from \code{INLA} such
+#' Create one line summary using the marginal functions from \code{INLA} such
 #' as \code{inla.emarginal, inla.qmarginal, inla.mmarginal}.
 #'
 #' @param marg Marginal from an \code{inla} object.
-#' @param probs Percentiles returned by the summary.
+#' @param probs Percentiles returned by the summary. Default is
+#' \code{c(0.025, 0.5, 0.975)} which is the \code{inla} default.
 #'
 #' @return vector of summary data.
 #' @export
@@ -63,7 +61,10 @@ posterior_summary_inla <- function(.result, probs = c(0.025, 0.975),
 #' df$y <- rnorm(nrow(df), mean = df$mu, sd = df$sigma)
 #' the_fit <- INLA::inla(formula = y ~ x1 + x2, data = df)
 #' posterior_summary_inla_one(the_fit$marginals.fixed[[1]])
-posterior_summary_inla_one <- function(marg, probs = c(0.025, 0.975)) {
+posterior_summary_inla_one <- function(marg, probs = c(0.025, 0.5, 0.975)) {
+  checkmate::assert_matrix(marg, ncols = 2)
+  checkmate::assert_numeric(probs, lower = 0, upper = 1, finite = TRUE,
+                            unique = TRUE)
   mom <- calc_moments_inla(marg)
   quant = as.vector(INLA::inla.qmarginal(marginal = marg, p = probs))
   names(quant) <- paste0("Q", probs)
@@ -93,6 +94,7 @@ posterior_summary_inla_one <- function(marg, probs = c(0.025, 0.975)) {
 #' the_fit <- INLA::inla(formula = y ~ x1 + x2, data = df)
 #' calc_moments_inla(the_fit$marginals.fixed[[1]])
 calc_moments_inla <- function(marg) {
+  checkmate::assert_matrix(marg, ncols = 2)
   vals <- INLA::inla.emarginal(marginal = marg, fun = function(val) c(val, val^2))
   c("mean" = vals[1], "sd" = sqrt(vals[2] - vals[1]^2))
 }

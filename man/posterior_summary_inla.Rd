@@ -4,12 +4,10 @@
 \alias{posterior_summary_inla}
 \title{Write a summary of posterior distribution using marginals}
 \usage{
-posterior_summary_inla(.result, probs = c(0.025, 0.975), ren = TRUE)
+posterior_summary_inla(.result, ren = TRUE)
 }
 \arguments{
 \item{.result}{\code{inla} object.}
-
-\item{probs}{Percentiles returned by the summary.}
 
 \item{ren}{Rename the variable with \code{rename_brms}.}
 }

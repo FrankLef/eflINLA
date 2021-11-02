@@ -4,12 +4,13 @@
 \alias{posterior_summary_inla_one}
 \title{Create one line summary for a given marginal}
 \usage{
-posterior_summary_inla_one(marg, probs = c(0.025, 0.975))
+posterior_summary_inla_one(marg, probs = c(0.025, 0.5, 0.975))
 }
 \arguments{
 \item{marg}{Marginal from an \code{inla} object.}
 
-\item{probs}{Percentiles returned by the summary.}
+\item{probs}{Percentiles returned by the summary. Default is
+\code{c(0.025, 0.5, 0.975)} which is the \code{inla} default.}
 }
 \value{
 vector of summary data.
@@ -18,7 +19,7 @@ vector of summary data.
 Create one line summary for a given marginal.
 }
 \details{
-Create one line summary using the marginal funcitons from \code{INLA} such
+Create one line summary using the marginal functions from \code{INLA} such
 as \code{inla.emarginal, inla.qmarginal, inla.mmarginal}.
 }
 \examples{
